@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waterbodies"
+version = "0.0.1"
+authors = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
+maintainers = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
+description = "DE Africa waterbodies"
+readme =  {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "black[jupyter]",
+    "isort >= 5.0.0",
+    "flake8",
+    "mypy",
+    "sqlalchemy",
+    "geoalchemy2",
+    "fsspec",
+    "s3fs",
+    "geopandas",
+
+]
+
+[project.urls]
+Repository = "https://github.com/digitalearthafrica/waterbodies.git"
+"Bug Tracker" = "https://github.com/digitalearthafrica/waterbodies/issues"
+
+[tool.setuptools]
+packages = ["waterbodies"]
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
