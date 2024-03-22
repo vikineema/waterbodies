@@ -17,7 +17,7 @@ def get_filesystem(path: str) -> S3FileSystem | LocalFileSystem:
         # anon=True use anonymous connection (public buckets only).
         # anon=False uses the key/secret given, or boto’s credential resolver
         # (client_kwargs, environment, variables, config files, EC2 IAM server, in that order)
-        fs = s3fs.S3FileSystem(anon=False)
+        fs = s3fs.S3FileSystem(anon=True)
     else:
         fs = fsspec.filesystem("file")
     return fs
