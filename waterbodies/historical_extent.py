@@ -152,6 +152,6 @@ def load_waterbodies_from_db(engine: Engine | None) -> gpd.GeoDataFrame:
 
     sql_query = f"SELECT * FROM {table_name}"
 
-    waterbodies = gpd.read_postgis(sql_query, engine)
+    waterbodies = gpd.read_postgis(sql_query, engine, geom_col="geometry")
 
     return waterbodies
