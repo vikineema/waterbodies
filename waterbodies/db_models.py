@@ -1,9 +1,8 @@
 from datetime import datetime
 
 from geoalchemy2 import Geometry
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
-
+from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy.orm import Mapped, declarative_base
 
 WaterbodyBase = declarative_base()
 
@@ -11,13 +10,13 @@ WaterbodyBase = declarative_base()
 class WaterbodyHistoricalExtent(WaterbodyBase):
     __tablename__ = "waterbodies_historical_extent"
 
-    uid: Mapped[str] = mapped_column(primary_key=True)
+    uid: Mapped[str] = Column(String, primary_key=True)
     wb_id: Mapped[int]
     area_m2: Mapped[float]
     length_m: Mapped[float]
     perim_m: Mapped[float]
     timeseries: Mapped[str]
-    geometry = mapped_column(Geometry(geometry_type="POLYGON"))
+    geometry = Column(Geometry(geometry_type="POLYGON"))
 
     def __repr__(self) -> str:
         return f"WaterbodyHistoricalExtent(uid={self.uid!r}, wb_id={self.wb_id!r}, ...)"
@@ -26,8 +25,8 @@ class WaterbodyHistoricalExtent(WaterbodyBase):
 class WaterbodyObservation(WaterbodyBase):
     __tablename__ = "waterbody_observations"
 
-    obs_id: Mapped[str] = mapped_column(primary_key=True)
-    uid: Mapped[str] = mapped_column(ForeignKey("waterbodies_historical_extent.uid"), index=True)
+    obs_id: Mapped[str] = Column(String, primary_key=True)
+    uid: Mapped[str] = Column(String, ForeignKey("waterbodies_historical_extent.uid"), index=True)
     px_total: Mapped[int]
     px_wet: Mapped[float]
     area_wet_m2: Mapped[float]
