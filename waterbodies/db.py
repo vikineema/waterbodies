@@ -1,9 +1,8 @@
 import logging
 import os
 
-from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy import MetaData, create_engine
 from sqlalchemy.engine.base import Engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
 from waterbodies.db_models import WaterbodyBase
@@ -128,5 +127,14 @@ def create_table(engine: Engine, db_model) -> Table:
 
 
 def delete_table(engine: Engine, table_name: str):
+    """
+    Delete a table in the database.
+
+    Parameters
+    ----------
+    engine : Engine
+    table_name : str
+        Name of the table to delete.
+    """
     table = get_existing_table(engine=engine, table_name=table_name)
     METADATA_OBJ.drop_all(bind=engine, tables=[table], checkfirst=True)
