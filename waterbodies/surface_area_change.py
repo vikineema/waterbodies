@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
@@ -8,11 +10,34 @@ from waterbodies.db_models import WaterbodyObservation
 
 
 def create_waterbodies_observations_table(engine: Engine) -> Table:
+    """
+    Create the waterbodies_observations table if it does not exist.
+
+    Parameters
+    ----------
+    engine : Engine
+
+    Returns
+    -------
+    Table
+        The waterbodies_observations table.
+    """
     table = create_table(engine=engine, db_model=WaterbodyObservation)
     return table
 
 
-def get_most_recent_observation(engine: Engine | None):
+def get_most_recent_observation_date(engine: Engine | None) -> datetime:
+    """Get the date of the most recent waterbody observation.
+
+    Parameters
+    ----------
+    engine : Engine | None
+
+    Returns
+    -------
+    datetime
+        Date of the last waterbody observation.
+    """
     if engine is None:
         engine = get_prod_waterbodies_engine()
 
@@ -20,6 +45,6 @@ def get_most_recent_observation(engine: Engine | None):
 
     Session = sessionmaker(engine)
     with Session.begin() as session:
-        most_recent_date = session.query(func.max(table.date)).scalar()
+        most_recent_date = session.query(func.max(table.c.date)).scalar()
 
     return most_recent_date
