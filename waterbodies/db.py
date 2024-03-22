@@ -130,22 +130,3 @@ def create_table(engine: Engine, db_model) -> Table:
 def delete_table(engine: Engine, table_name: str):
     table = get_existing_table(engine=engine, table_name=table_name)
     METADATA_OBJ.drop_all(bind=engine, tables=[table], checkfirst=True)
-
-
-def get_date_of_last_update(table_name: str, engine: str | None = None):
-
-    if engine is None:
-        engine = get_prod_waterbodies_engine()
-
-    Session = sessionmaker(engine)
-
-    with Session.begin() as session:
-        result = session.execute(
-            text(
-                f"SELECT last_vacuum, last_autovacuum, last_analyze, \
-                                 last_autoanalyze FROM pg_stat_user_tables WHERE relname \
-                                 = '{table_name}'"
-            )
-        )
-        update_time_postgres = result.scalar()
-    return update_time_postgres
