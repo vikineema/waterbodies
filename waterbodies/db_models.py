@@ -2,11 +2,10 @@ from datetime import datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 
 
-class WaterbodyBase(DeclarativeBase):
-    pass
+WaterbodyBase = declarative_base()
 
 
 class WaterbodyHistoricalExtent(WaterbodyBase):
