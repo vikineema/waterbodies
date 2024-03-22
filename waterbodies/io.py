@@ -11,7 +11,9 @@ def is_s3_file(path: str) -> bool:
     return path.startswith("s3://")
 
 
-def get_filesystem(path: str) -> S3FileSystem | LocalFileSystem:
+def get_filesystem(
+    path: str,
+) -> S3FileSystem | LocalFileSystem:
     if is_s3_file(path=path):
         # TODO Need to test which works for the entire repository
         # anon=True use anonymous connection (public buckets only).
@@ -43,7 +45,7 @@ def is_parquet(path: str) -> bool:
 
 def load_vector_file(path: str) -> gpd.GeoDataFrame:
     if is_parquet(path=path):
-        gdf = gpd.read_parquet(path)
+        gdf = gpd.read_parquet(path, filesystem=get_filesystem(path=path))
     else:
         gdf = gpd.read_file(path)
     return gdf
