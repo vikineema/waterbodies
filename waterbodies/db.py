@@ -1,7 +1,7 @@
 import logging
 import os
 
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
@@ -141,9 +141,11 @@ def get_date_of_last_update(table_name: str, engine: str | None = None):
 
     with Session.begin() as session:
         result = session.execute(
-            f"SELECT last_vacuum, last_autovacuum, last_analyze, \
+            text(
+                f"SELECT last_vacuum, last_autovacuum, last_analyze, \
                                  last_autoanalyze FROM pg_stat_user_tables WHERE relname \
                                  = '{table_name}'"
+            )
         )
         update_time_postgres = result.scalar()
     return update_time_postgres
