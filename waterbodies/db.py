@@ -6,7 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
-from waterbodies.db_models import WaterbodyBase, WaterbodyHistoricalExtent
+from waterbodies.db_models import WaterbodyBase
 
 _log = logging.getLogger(__name__)
 
@@ -127,17 +127,12 @@ def create_table(engine: Engine, db_model) -> Table:
     return table
 
 
-def create_waterbodies_historical_extent(engine: Engine) -> Table:
-    table = create_table(engine=engine, db_model=WaterbodyHistoricalExtent)
-    return table
-
-
 def delete_table(engine: Engine, table_name: str):
     table = get_existing_table(engine=engine, table_name=table_name)
     METADATA_OBJ.drop_all(bind=engine, tables=[table], checkfirst=True)
 
 
-def get_date_of_last_update(table_name: str, engine : str|None = None):
+def get_date_of_last_update(table_name: str, engine: str | None = None):
 
     if engine is None:
         engine = get_prod_waterbodies_engine()
@@ -145,8 +140,10 @@ def get_date_of_last_update(table_name: str, engine : str|None = None):
     Session = sessionmaker(engine)
 
     with Session.begin() as session:
-        result = session.execute(f"SELECT last_vacuum, last_autovacuum, last_analyze, \
+        result = session.execute(
+            f"SELECT last_vacuum, last_autovacuum, last_analyze, \
                                  last_autoanalyze FROM pg_stat_user_tables WHERE relname \
-                                 = '{table_name}'")
+                                 = '{table_name}'"
+        )
         update_time_postgres = result.scalar()
     return update_time_postgres
