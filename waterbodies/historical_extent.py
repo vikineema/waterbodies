@@ -141,3 +141,17 @@ def add_waterbodies_polygons_to_db(
             session.execute(insert(table), insert_parameters)
     else:
         _log.error(f"No polygons to insert into the {table.name} table")
+
+
+def load_waterbodies_from_db(engine: Engine | None) -> gpd.GeoDataFrame:
+    if engine is None:
+        engine = get_prod_waterbodies_engine()
+
+    table = create_waterbodies_historical_extent_table(engine=engine)
+    table_name = table.name
+
+    sql_query = f"SELECT * FROM {table_name}"
+
+    waterbodies = gpd.read_postgis(sql_query, engine)
+
+    return waterbodies
