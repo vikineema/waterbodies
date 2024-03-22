@@ -40,6 +40,19 @@ def validate_waterbodies_polygons(waterbodies_polygons: gpd.GeoDataFrame) -> gpd
 
 
 def create_waterbodies_historical_extent_table(engine: Engine) -> Table:
+    """
+    Create the waterbodies_historical_extent_table if
+    it does not exist.
+
+    Parameters
+    ----------
+    engine : Engine
+
+    Returns
+    -------
+    Table
+        waterbodies_historical_extent table
+    """
     table = create_table(engine=engine, db_model=WaterbodyHistoricalExtent)
     return table
 
@@ -144,6 +157,19 @@ def add_waterbodies_polygons_to_db(
 
 
 def load_waterbodies_from_db(engine: Engine | None) -> gpd.GeoDataFrame:
+    """
+    Load all waterbodies polygons from the `waterbodies_historical_extent`
+    table.
+
+    Parameters
+    ----------
+    engine :
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        All waterbodies polygons present in the `waterbodies_historical_extent` table.
+    """
     if engine is None:
         engine = get_prod_waterbodies_engine()
 
