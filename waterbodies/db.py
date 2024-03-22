@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
 from waterbodies.db_models import WaterbodyBase, WaterbodyHistoricalExtent
-from waterbodies.io import check_file_exists, load_vector_file
 
 _log = logging.getLogger(__name__)
 
@@ -138,37 +137,16 @@ def delete_table(engine: Engine, table_name: str):
     METADATA_OBJ.drop_all(bind=engine, tables=[table], checkfirst=True)
 
 
-def add_waterbody_polygons_to_db(
-    engine: Engine,
-    waterbodies_polygons_fp: str,
-    update_rows: bool = True,
-):
-    """
-    Add the waterbodies polygons into the
-    waterbodies historical extent  table.
+def get_date_of_last_update(table_name: str, engine : str|None = None):
 
-    Parameters
-    ----------
-    engine : Engine
-    update_rows : bool, optional
-        If True if the polygon uid already exists in the waterbodies historical extent table,
-        the row will be updated, else it will be skipped.
-    waterbodies_polygons_fp : str
-        Path to the shapefile/geojson/geoparquet file containing the waterbodies polygons.
-    """
-    # connect to the db
-    if not engine:
+    if engine is None:
         engine = get_prod_waterbodies_engine()
 
-    if not check_file_exists(path=waterbodies_polygons_fp):
-        e = FileNotFoundError(f"File {waterbodies_polygons_fp} does not exist!)")
-        _log.error(e)
-        raise e
-    else:
-        try:
-            waterbodies_polygons = load_vector_file(path=waterbodies_polygons_fp).to_crs(
-                "EPSG:4326"
-            )
-        except Exception as error:
-            _log.exception(error)
-            raise error
+    Session = sessionmaker(engine)
+
+    with Session.begin() as session:
+        result = session.execute(f"SELECT last_vacuum, last_autovacuum, last_analyze, \
+                                 last_autoanalyze FROM pg_stat_user_tables WHERE relname \
+                                 = '{table_name}'")
+        update_time_postgres = result.scalar()
+    return update_time_postgres
