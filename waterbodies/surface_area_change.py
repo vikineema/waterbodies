@@ -26,8 +26,8 @@ def create_waterbodies_observations_table(engine: Engine) -> Table:
     return table
 
 
-def get_most_recent_observation_date(engine: Engine | None) -> datetime:
-    """Get the date of the most recent waterbody observation.
+def get_last_observation_date(engine: Engine | None) -> datetime:
+    """Get the date of the last waterbody observation.
 
     Parameters
     ----------
@@ -45,6 +45,6 @@ def get_most_recent_observation_date(engine: Engine | None) -> datetime:
 
     Session = sessionmaker(engine)
     with Session.begin() as session:
-        most_recent_date = session.query(func.max(table.c.date)).scalar()
+        last_observation_date = session.query(func.max(table.c.date)).scalar()
 
-    return most_recent_date
+    return last_observation_date
