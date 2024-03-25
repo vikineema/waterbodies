@@ -24,6 +24,8 @@ dependencies = [
     "fsspec",
     "s3fs",
     "geopandas",
+    "datacube",
+    "pystac-client"
 
 ]
 
@@ -39,3 +41,6 @@ profile = "black"
 
 [tool.black]
 line-length = 100
+
+[project.scripts]
+waterbodies = "waterbodies.cli.main:waterbodies"
