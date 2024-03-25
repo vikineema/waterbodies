@@ -59,7 +59,7 @@ def create_waterbodies_historical_extent_table(engine: Engine) -> Table:
 
 def add_waterbodies_polygons_to_db(
     waterbodies_polygons_file_path: str,
-    engine: Engine | None = None,
+    engine: Engine,
     update_rows: bool = True,
 ):
     """
@@ -70,15 +70,12 @@ def add_waterbodies_polygons_to_db(
     ----------
     waterbodies_polygons_file_path : str
         Path to the shapefile/geojson/geoparquet file containing the waterbodies polygons.
-    engine : Engine | None, optional
+    engine : Engine
     update_rows : bool, optional
          If True if the polygon uid already exists in the waterbodies table, the row will be
          updated else it will be skipped, by default True
 
     """
-    if engine is None:
-        engine = get_waterbodies_engine()
-
     if not check_file_exists(path=waterbodies_polygons_file_path):
         e = FileNotFoundError(f"File {waterbodies_polygons_file_path} does not exist!)")
         _log.error(e)
@@ -156,22 +153,20 @@ def add_waterbodies_polygons_to_db(
         _log.error(f"No polygons to insert into the {table.name} table")
 
 
-def load_waterbodies_from_db(engine: Engine | None) -> gpd.GeoDataFrame:
+def load_waterbodies_from_db(engine: Engine) -> gpd.GeoDataFrame:
     """
     Load all waterbodies polygons from the `waterbodies_historical_extent`
     table.
 
     Parameters
     ----------
-    engine :
+    engine : Engine
 
     Returns
     -------
     gpd.GeoDataFrame
         All waterbodies polygons present in the `waterbodies_historical_extent` table.
     """
-    if engine is None:
-        engine = get_waterbodies_engine()
 
     table = create_waterbodies_historical_extent_table(engine=engine)
     table_name = table.name
