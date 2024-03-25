@@ -6,7 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
-from waterbodies.db import create_table, get_prod_waterbodies_engine
+from waterbodies.db import create_table, get_waterbodies_engine
 from waterbodies.db_models import WaterbodyHistoricalExtent
 from waterbodies.io import check_file_exists, load_vector_file
 
@@ -77,7 +77,7 @@ def add_waterbodies_polygons_to_db(
 
     """
     if engine is None:
-        engine = get_prod_waterbodies_engine()
+        engine = get_waterbodies_engine()
 
     if not check_file_exists(path=waterbodies_polygons_file_path):
         e = FileNotFoundError(f"File {waterbodies_polygons_file_path} does not exist!)")
@@ -171,7 +171,7 @@ def load_waterbodies_from_db(engine: Engine | None) -> gpd.GeoDataFrame:
         All waterbodies polygons present in the `waterbodies_historical_extent` table.
     """
     if engine is None:
-        engine = get_prod_waterbodies_engine()
+        engine = get_waterbodies_engine()
 
     table = create_waterbodies_historical_extent_table(engine=engine)
     table_name = table.name

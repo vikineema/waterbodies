@@ -5,7 +5,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
-from waterbodies.db import create_table, get_prod_waterbodies_engine
+from waterbodies.db import create_table, get_waterbodies_engine
 from waterbodies.db_models import WaterbodyObservation
 
 
@@ -39,7 +39,7 @@ def get_last_observation_date(engine: Engine | None) -> datetime:
         Date of the last waterbody observation.
     """
     if engine is None:
-        engine = get_prod_waterbodies_engine()
+        engine = get_waterbodies_engine()
 
     table = create_waterbodies_observations_table(engine=engine)
 
