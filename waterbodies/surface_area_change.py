@@ -1,12 +1,15 @@
-from datetime import datetime
+import datetime
 
+from datacube import Datacube
+from datacube.model import Dataset
 from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
-from waterbodies.db import create_table, get_waterbodies_engine
+from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
+from waterbodies.hopper import find_datasets_by_creation_date
 
 
 def create_waterbodies_observations_table(engine: Engine) -> Table:
@@ -26,7 +29,7 @@ def create_waterbodies_observations_table(engine: Engine) -> Table:
     return table
 
 
-def get_last_observation_date(engine: Engine | None) -> datetime:
+def get_last_waterbody_observation_date(engine: Engine) -> datetime:
     """Get the date of the last waterbody observation.
 
     Parameters
@@ -38,9 +41,6 @@ def get_last_observation_date(engine: Engine | None) -> datetime:
     datetime
         Date of the last waterbody observation.
     """
-    if engine is None:
-        engine = get_waterbodies_engine()
-
     table = create_waterbodies_observations_table(engine=engine)
 
     Session = sessionmaker(engine)
@@ -48,3 +48,17 @@ def get_last_observation_date(engine: Engine | None) -> datetime:
         last_observation_date = session.query(func.max(table.c.date)).scalar()
 
     return last_observation_date
+
+
+def get_datasets_for_gapfill(engine: Engine) -> list[Dataset]:
+
+    dc = Datacube(app="gapfill")
+
+    last_observation_date = get_last_waterbody_observation_date(engine=engine).date()
+
+    today = datetime.datetime.now().date()
+
+    dss = find_datasets_by_creation_date(
+        product="wofs_ls", start_date=last_observation_date, end_date=today, dc=dc
+    )
+    return dss
