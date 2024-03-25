@@ -6,7 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
 
-from waterbodies.db import create_table, get_waterbodies_engine
+from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyHistoricalExtent
 from waterbodies.io import check_file_exists, load_vector_file
 
