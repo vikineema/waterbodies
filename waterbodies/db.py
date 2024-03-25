@@ -13,33 +13,7 @@ _log = logging.getLogger(__name__)
 METADATA_OBJ = WaterbodyBase.metadata
 
 
-def get_dev_waterbodies_engine(password: str) -> Engine:
-    """
-    Create engine to connect to the DEV waterbodies database.
-    For use in the DEV Analysis Sandbox.
-
-    Parameters
-    ----------
-    password : str
-        Password for the DEV waterbodies database.
-
-    Returns
-    -------
-    Engine
-        Engine to connect to the DEV waterbodies database.
-    """
-    dialect = "postgresql"
-    driver = "psycopg2"
-    username = "waterbodies_writer"
-    host = "db-writer"
-    port = 5432
-    database_name = "waterbodies"
-
-    database_url = f"{dialect}+{driver}://{username}:{password}@{host}:{port}/{database_name}"
-    return create_engine(database_url, future=True)
-
-
-def get_prod_waterbodies_engine() -> Engine:
+def get_waterbodies_engine() -> Engine:
     """
     Create engine to connect to the PROD waterbodies database.
 
