@@ -16,6 +16,24 @@ def find_datasets_by_creation_date(
     end_date: datetime.date,
     dc: Datacube = None,
 ) -> list[Dataset]:
+    """
+    Search for datasets in the datacube using the creation time metadata
+
+    Parameters
+    ----------
+    product : str
+        Search for datasets belonging to the product.
+    start_date : datetime.date
+        Start date for creation time range.
+    end_date : datetime.date
+        End date for creation time range.
+    dc : Datacube, optional
+
+    Returns
+    -------
+    list[Dataset]
+        Datasets found matching the product and creation time range specified.
+    """
 
     if dc is None:
         dc = Datacube()
