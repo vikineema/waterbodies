@@ -82,8 +82,8 @@ def get_datasets_for_gapfill(engine: Engine) -> list[Dataset]:
         product="wofs_ls", start_date=last_observation_date, end_date=today, dc=dc
     )
 
-    _log.found(
-        f'Found {len(dss)} new wofs_ls scenes added \
-        to the datacube since {last_observation_date.strftime("%Y-%m-%d")}'
+    _log.info(
+        f"Found {len(dss)} new wofs_ls scenes added"
+        f"to the datacube since {last_observation_date.strftime("%Y-%m-%d")}"
     )
     return dss
