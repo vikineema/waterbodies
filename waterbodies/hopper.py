@@ -190,10 +190,7 @@ def create_task_from_task_id(
     scenes = dc.find_datasets(
         product=product, time=(period), like=tile_geobox, group_by="solar_day"
     )
-
     scene_ids = list(set([scene.id for scene in scenes]))
-    _log.info(f"Total of {len(scene_ids):,d} unique dataset UUIDs for task {task_id}.")
-
     task = {task_id: scene_ids}
 
     return task
