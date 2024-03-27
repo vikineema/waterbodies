@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from datacube import Datacube
 from datacube.model import Dataset
@@ -10,6 +11,8 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.hopper import find_datasets_by_creation_date
+
+_log = logging.getLogger(__name__)
 
 
 def create_waterbodies_observations_table(engine: Engine) -> Table:
@@ -30,16 +33,19 @@ def create_waterbodies_observations_table(engine: Engine) -> Table:
 
 
 def get_last_waterbody_observation_date(engine: Engine) -> datetime:
-    """Get the date of the last waterbody observation.
+    """
+    Get the date of the last waterbody observation.
 
-    Parameters
+    Parametersrom odc.dscache.tools.tiling import parse_gridspec_with_name
+    from odc.dscache.tools import bin_dataset_stream
+    from waterbodies.hopper import persist     Date of the last waterbody observation.
     ----------
     engine : Engine | None
 
     Returns
     -------
     datetime
-        Date of the last waterbody observation.
+        Date of the last waterbody observation
     """
     table = create_waterbodies_observations_table(engine=engine)
 
@@ -51,6 +57,20 @@ def get_last_waterbody_observation_date(engine: Engine) -> datetime:
 
 
 def get_datasets_for_gapfill(engine: Engine) -> list[Dataset]:
+    """
+    Get all the wofs_ls scenes added to the datacube since the
+    date of the last waterbody observation to today.
+
+    Parameters
+    ----------
+    engine : Engine
+
+    Returns
+    -------
+    list[Dataset]
+        All the wofs_ls scenes added to the datacube since the date of the
+        last waterbody observation to today.
+    """
 
     dc = Datacube(app="gapfill")
 
@@ -60,5 +80,10 @@ def get_datasets_for_gapfill(engine: Engine) -> list[Dataset]:
 
     dss = find_datasets_by_creation_date(
         product="wofs_ls", start_date=last_observation_date, end_date=today, dc=dc
+    )
+
+    _log.found(
+        f'Found {len(dss)} new wofs_ls scenes added \
+        to the datacube since {last_observation_date.strftime("%Y-%m-%d")}'
     )
     return dss
