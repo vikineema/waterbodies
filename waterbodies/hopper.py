@@ -5,8 +5,11 @@ from types import SimpleNamespace
 import toolz
 from datacube import Datacube
 from datacube.model import Dataset
+from odc.dscache.tools import bin_dataset_stream
+from odc.dscache.tools.tiling import parse_gridspec_with_name
 from odc.stats.tasks import CompressedDataset, compress_ds
 from odc.stats.utils import Cell
+from tqdm import tqdm
 
 dt_range = SimpleNamespace(start=None, end=None)
 
@@ -81,9 +84,7 @@ def persist(ds: Dataset) -> CompressedDataset:
     return _ds
 
 
-def bin_by_solar_day(
-    cells: dict[tuple[int, int], Cell]
-) -> dict[tuple[str, int, int], list[CompressedDataset]]:
+def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int, int], list[str]]:
     """
     Bin by solar day.
 
@@ -94,8 +95,9 @@ def bin_by_solar_day(
 
     Returns
     -------
-    dict[tuple[str, int, int], list[CompressedDataset]]
-        Input cells with datasets binned by day.
+    dict[tuple[str, int, int], list[str]]
+        Tasks containing the task id (solar_day, tile id x, tile id y) and Datasets UUIDs
+        for the task.
     """
     tasks = {}
     for tile_id, cell in cells.items():
@@ -111,9 +113,55 @@ def bin_by_solar_day(
     # and around weekly boundary
     # From the compressed datasets keep only the dataset uuids
     tasks = {task_id: [ds.id for ds in set(dss)] for task_id, dss in tasks.items()}
+    return tasks
 
-    _log.info(f"Total of {len(set(list(tasks.values))):,d} unique dataset UUIDs after filtering.")
 
+def create_tasks(
+    scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] = []
+) -> dict[tuple[str, int, int], list[str]]:
+    """
+    Create tasks to run from scenes.
+
+    Parameters
+    ----------
+    scenes : list[Dataset]
+        Scenes to  create tasks for.
+    tile_ids_of_interest : list[tuple[int]], optional
+        Tile ids of interest, by default []
+
+    Returns
+    -------
+    dict[tuple[str, int, int], list[str]]
+        Tasks containing the task id (solar_day, tile id x, tile id y) and Datasets UUIDs
+        for the task.
+    """
+
+    cells = {}
+    grid_name = "africa_30"
+
+    grid, gridspec = parse_gridspec_with_name(grid_name)
+    dss = bin_dataset_stream(gridspec, scenes, cells, persist=persist)
+
+    with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
+        for _ in dss:
+            pass
+
+    if tile_ids_of_interest:
+        _log.info(
+            f"Filter the {len(cells)} cells to keep only the cells"
+            f"containing the {len(tile_ids_of_interest)} tile ids of interest."
+        )
+        cells = {
+            tile_id: cell for tile_id, cell in cells.items() if tile_id in tile_ids_of_interest
+        }
+        _log.info(f"Total number of cells after filtering: {len(cells)}")
+    else:
+        _log.info(f"Total number of cells: {len(cells)}")
+
+    _log.info("For each cell group the datasets by solar day")
+    tasks = bin_by_solar_day(cells=cells)
+
+    _log.info(f"Total of {len(set(list(tasks.values))):,d} unique dataset UUIDs.")
     _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
