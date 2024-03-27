@@ -79,7 +79,7 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
     for root, dirs, files in fs.walk(directory_path):
         for file_name in files:
             if is_geotiff(path=file_name):
-                if file_name_pattern.match(file_name):
+                if re.search(file_name_pattern, file_name):
                     geotiff_file_paths.append(os.path.join(root, file_name))
                 else:
                     continue

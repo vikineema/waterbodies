@@ -16,8 +16,11 @@ def parse_tile_id_from_str(string_: str) -> tuple[int]:
     tuple[int]
         Found tile id (x,y).
     """
-    tile_id_x_str = re.compile(r"x\d{3}").match(string_).group(0)
-    tile_id_y_str = re.compile(r"y\d{3}").match(string_).group(0)
+    x_id_pattern = re.compile(r"x\d{3}")
+    y_id_pattern = re.compile(r"y\d{3}")
+
+    tile_id_x_str = re.search(x_id_pattern, string_).group(0)
+    tile_id_y_str = re.search(y_id_pattern, string_).group(0)
 
     tile_id_x = int(tile_id_x_str.lstrip("x"))
     tile_id_y = int(tile_id_y_str.lstrip("x"))
