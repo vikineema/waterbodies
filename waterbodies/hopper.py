@@ -1,4 +1,5 @@
 import datetime
+import logging
 from types import SimpleNamespace
 
 import toolz
@@ -8,6 +9,8 @@ from odc.stats.tasks import CompressedDataset, compress_ds
 from odc.stats.utils import Cell
 
 dt_range = SimpleNamespace(start=None, end=None)
+
+_log = logging.getLogger(__name__)
 
 
 def find_datasets_by_creation_date(
@@ -78,7 +81,7 @@ def persist(ds: Dataset) -> CompressedDataset:
     return _ds
 
 
-def bin_solar_day(
+def bin_by_solar_day(
     cells: dict[tuple[int, int], Cell]
 ) -> dict[tuple[str, int, int], list[CompressedDataset]]:
     """
@@ -95,15 +98,22 @@ def bin_solar_day(
         Input cells with datasets binned by day.
     """
     tasks = {}
-    for tidx, cell in cells.items():
-        # This is a great pylint warning, but doesn't apply here because we
-        # only call the lambda from inside each iteration of the loop
-        # pylint:disable=cell-var-from-loop
+    for tile_id, cell in cells.items():
         utc_offset = cell.utc_offset
-        grouped = toolz.groupby(lambda ds: (ds.time + utc_offset).date(), cell.dss)
+        grouped_by_solar_day = toolz.groupby(lambda ds: (ds.time + utc_offset).date(), cell.dss)
 
-        for day, dss in grouped.items():
-            temporal_k = (day.strftime("%Y-%m-%d"),)
-            tasks[temporal_k + tidx] = dss
+        for solar_day_date, dss in grouped_by_solar_day.items():
+            solar_day_key = (solar_day_date.strftime("%Y-%m-%d"),)
+            tasks[solar_day_key + tile_id] = dss
+
+    # Remove duplicate source uids
+    # Duplicates occur when queried datasets are captured around UTC midnight
+    # and around weekly boundary
+    # From the compressed datasets keep only the dataset uuids
+    tasks = {task_id: [ds.id for ds in set(dss)] for task_id, dss in tasks.items()}
+
+    _log.info(f"Total of {len(set(list(tasks.values))):,d} unique dataset UUIDs after filtering.")
+
+    _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
