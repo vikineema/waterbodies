@@ -1,5 +1,6 @@
 import datetime
 import logging
+from itertools import chain
 from types import SimpleNamespace
 
 import toolz
@@ -148,7 +149,7 @@ def create_tasks(
 
     if tile_ids_of_interest:
         _log.info(
-            f"Filter the {len(cells)} cells to keep only the cells"
+            f"Filter the {len(cells)} cells to keep only the cells "
             f"containing the {len(tile_ids_of_interest)} tile ids of interest."
         )
         cells = {
@@ -161,7 +162,9 @@ def create_tasks(
     _log.info("For each cell group the datasets by solar day")
     tasks = bin_by_solar_day(cells=cells)
 
-    _log.info(f"Total of {len(set(list(tasks.values))):,d} unique dataset UUIDs.")
+    _log.info(
+        f"Total of {len(set(list(chain.from_iterable(tasks.values())))):,d} unique dataset UUIDs."
+    )
     _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
