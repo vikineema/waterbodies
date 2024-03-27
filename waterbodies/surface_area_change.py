@@ -11,8 +11,8 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.hopper import (
+    create_task_from_task_id,
     create_tasks_from_scenes,
-    create_tasks_from_task_id,
     find_datasets_by_creation_date,
 )
 
@@ -96,7 +96,23 @@ def get_task_ids_for_gapfill_scenes(
     engine: Engine,
     tile_ids_of_interest: [list[tuple[int]]],
     dc: Datacube,
-):
+) -> list[str]:
+    """
+    Get all the task ids for the tasks affected by
+    all the wofs_ls scenes added to the datacube since the
+    date of the last waterbody observation to today.
+
+    Parameters
+    ----------
+    engine : Engine
+    tile_ids_of_interest : list[tuple[int]]]
+    dc : Datacube
+
+    Returns
+    -------
+    list[str]
+        Task ids for the gapfill scenes
+    """
     # Find all the new wofs_ls scenes added to the datacube
     # since the last waterbody observation date.
     gapfill_scenes = get_gapfill_scenes(engine=engine, dc=dc)
@@ -104,22 +120,39 @@ def get_task_ids_for_gapfill_scenes(
     gapfill_scenes_tasks = create_tasks_from_scenes(
         scenes=gapfill_scenes, tile_ids_of_interest=tile_ids_of_interest
     )
-    gapfill_scenes_task_ids = list(gapfill_scenes_tasks.keys())
+    gapfill_scenes_task_ids = [
+        task_id for task in gapfill_scenes_tasks for task_id, task_datasets in task.items()
+    ]
     return gapfill_scenes_task_ids
 
 
 def create_tasks_for_gapfill_run(
     engine: Engine,
     tile_ids_of_interest: [list[tuple[int]]],
-):
+) -> list[dict[tuple[str, int, int], list[str]]]:
+    """
+    List all the tasks required for a gap fill run.
+
+    Parameters
+    ----------
+    engine : Engine
+    tile_ids_of_interest : list[tuple[int]]]
+        Tile ids to filter to.
+
+    Returns
+    -------
+    list[dict[tuple[str, int, int], list[str]]]
+        Tasks to run for the a gap fill run
+    """
+
     dc = Datacube(app="gapfill")
 
     gapfill_scenes_task_ids = get_task_ids_for_gapfill_scenes(
         engine=engine, tile_ids_of_interest=tile_ids_of_interest, dc=dc
     )
     # For each task find the datasets that overlap it
-    tasks = {}
+    tasks = []
     for task_id in gapfill_scenes_task_ids:
-        tasks.update(create_tasks_from_task_id(task_id=task_id, dc=dc, product="wofs_ls"))
+        tasks.append(create_task_from_task_id(task_id=task_id, dc=dc, product="wofs_ls"))
 
     return tasks

@@ -160,27 +160,30 @@ def create_tasks_from_scenes(
     tasks = bin_by_solar_day(cells=cells)
 
     # Convert from dictionary to list of dictionaries.
-    tasks = [{k: v} for k, v in tasks.items()]
+    tasks = [{task_id: task_datasets} for task_id, task_datasets in tasks.items()]
 
-    _log.info(
-        f"Total of {len(set(chain.from_iterable([v for i in tasks for k,v in i.items()]))):,d} unique dataset UUIDs."
+    no_of_unique_datasets = len(
+        set(
+            chain.from_iterable(
+                [task_datasets for task in tasks for task_id, task_datasets in task.items()]
+            )
+        )
     )
+    _log.info(f"Total of {no_of_unique_datasets:,d} unique dataset UUIDs.")
     _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
 
 
-def create_tasks_from_task_id(
+def create_task_from_task_id(
     task_id: tuple[str, int, int],
     dc: Datacube,
     product: str,
-) -> list[dict[tuple[str, int, int], list[str]]]:
+) -> dict[tuple[str, int, int], list[str]]:
+    grid, gridspec = parse_gridspec_with_name(GRID_NAME)
 
     period, tile_id_x, tile_idy = task_id
-
     tile_id = (tile_id_x, tile_idy)
-
-    grid, gridspec = parse_gridspec_with_name(GRID_NAME)
 
     tile_geobox = gridspec.tile_geobox(tile_index=tile_id)
 
@@ -188,6 +191,9 @@ def create_tasks_from_task_id(
         product=product, time=(period), like=tile_geobox, group_by="solar_day"
     )
 
-    tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=[tile_id])
+    scene_ids = list(set([scene.id for scene in scenes]))
+    _log.info(f"Total of {len(scene_ids):,d} unique dataset UUIDs for task {task_id}.")
 
-    return tasks
+    task = {task_id: scene_ids}
+
+    return task
