@@ -7,7 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
-from tqm import tqdm
+from tqdm import tqdm
 
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
