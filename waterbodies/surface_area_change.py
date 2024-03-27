@@ -7,6 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
+from tqm import tqdm
 
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
@@ -152,7 +153,12 @@ def create_tasks_for_gapfill_run(
     )
     # For each task find the datasets that overlap it
     tasks = []
-    for task_id in gapfill_scenes_task_ids:
-        tasks.append(create_task_from_task_id(task_id=task_id, dc=dc, product="wofs_ls"))
+    with tqdm(
+        iterable=gapfill_scenes_task_ids,
+        desc=f"Getting tasks for {len(gapfill_scenes_task_ids)} task ids",
+        total=len(gapfill_scenes_task_ids),
+    ) as gapfill_scenes_task_ids:
+        for task_id in gapfill_scenes_task_ids:
+            tasks.append(create_task_from_task_id(task_id=task_id, dc=dc, product="wofs_ls"))
 
     return tasks
