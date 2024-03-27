@@ -3,7 +3,6 @@ import logging
 from itertools import chain
 
 from datacube import Datacube
-from datacube.model import Dataset
 from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
@@ -103,7 +102,7 @@ def create_tasks_for_gapfill_run(
     gapfill_scenes_task_ids = [
         task_id for task in gapfill_scenes_tasks for task_id, task_datasets in task.items()
     ]
-    _log.found(f"Found {len(gapfill_scenes_task_ids)} affected by the gap fill scenes")
+    _log.info(f"Found {len(gapfill_scenes_task_ids)} affected by the gap fill scenes")
 
     # For each task id find the scenes overlapping it.
     scenes = []
