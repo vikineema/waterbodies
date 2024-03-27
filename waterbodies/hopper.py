@@ -13,6 +13,7 @@ from odc.stats.utils import Cell
 from tqdm import tqdm
 
 dt_range = SimpleNamespace(start=None, end=None)
+GRID_NAME = "africa_30"
 
 _log = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def find_datasets_by_creation_date(
     product: str,
     start_date: datetime.date,
     end_date: datetime.date,
-    dc: Datacube = None,
+    dc: Datacube,
 ) -> list[Dataset]:
     """
     Search for datasets in the datacube using the creation time metadata
@@ -34,16 +35,13 @@ def find_datasets_by_creation_date(
         Start date for creation time range.
     end_date : datetime.date
         End date for creation time range.
-    dc : Datacube, optional
+    dc : Datacube
 
     Returns
     -------
     list[Dataset]
         Datasets found matching the product and creation time range specified.
     """
-
-    if dc is None:
-        dc = Datacube()
 
     assert end_date >= start_date
 
@@ -117,9 +115,9 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     return tasks
 
 
-def create_tasks(
+def create_tasks_from_scenes(
     scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] = []
-) -> dict[tuple[str, int, int], list[str]]:
+) -> list[dict[tuple[str, int, int], list[str]]]:
     """
     Create tasks to run from scenes.
 
@@ -132,15 +130,14 @@ def create_tasks(
 
     Returns
     -------
-    dict[tuple[str, int, int], list[str]]
-        Tasks containing the task id (solar_day, tile id x, tile id y) and Datasets UUIDs
-        for the task.
+    list[dict[tuple[str, int, int], list[str]]]
+        A list of tasks with each tasks containing the task id (solar_day, tile id x, tile id y)
+        and Datasets UUID
     """
 
     cells = {}
-    grid_name = "africa_30"
 
-    grid, gridspec = parse_gridspec_with_name(grid_name)
+    grid, gridspec = parse_gridspec_with_name(GRID_NAME)
     dss = bin_dataset_stream(gridspec, scenes, cells, persist=persist)
 
     with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
@@ -162,9 +159,35 @@ def create_tasks(
     _log.info("For each cell group the datasets by solar day")
     tasks = bin_by_solar_day(cells=cells)
 
+    # Convert from dictionary to list of dictionaries.
+    tasks = [{k: v} for k, v in tasks.items()]
+
     _log.info(
-        f"Total of {len(set(list(chain.from_iterable(tasks.values())))):,d} unique dataset UUIDs."
+        f"Total of {len(set(chain.from_iterable([v for i in tasks for k,v in i.items()]))):,d} unique dataset UUIDs."
     )
     _log.info(f"Total number of tasks: {len(tasks)}")
+
+    return tasks
+
+
+def create_tasks_from_task_id(
+    task_id: tuple[str, int, int],
+    dc: Datacube,
+    product: str,
+) -> list[dict[tuple[str, int, int], list[str]]]:
+
+    period, tile_id_x, tile_idy = task_id
+
+    tile_id = (tile_id_x, tile_idy)
+
+    grid, gridspec = parse_gridspec_with_name(GRID_NAME)
+
+    tile_geobox = gridspec.tile_geobox(tile_index=tile_id)
+
+    scenes = dc.find_datasets(
+        product=product, time=(period), like=tile_geobox, group_by="solar_day"
+    )
+
+    tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=[tile_id])
 
     return tasks
