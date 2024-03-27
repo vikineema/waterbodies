@@ -23,7 +23,7 @@ def parse_tile_id_from_str(string_: str) -> tuple[int]:
     tile_id_y_str = re.search(y_id_pattern, string_).group(0)
 
     tile_id_x = int(tile_id_x_str.lstrip("x"))
-    tile_id_y = int(tile_id_y_str.lstrip("x"))
+    tile_id_y = int(tile_id_y_str.lstrip("y"))
 
     tile_id = (tile_id_x, tile_id_y)
     return tile_id
