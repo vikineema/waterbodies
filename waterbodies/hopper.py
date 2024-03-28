@@ -12,9 +12,9 @@ from odc.stats.tasks import CompressedDataset, compress_ds
 from odc.stats.utils import Cell
 from tqdm import tqdm
 
-dt_range = SimpleNamespace(start=None, end=None)
-GRID_NAME = "africa_30"
+_, GRIDSPEC = parse_gridspec_with_name("africa_30")
 
+dt_range = SimpleNamespace(start=None, end=None)
 _log = logging.getLogger(__name__)
 
 
@@ -103,8 +103,7 @@ def create_tasks_from_scenes(
 
     cells = {}
 
-    grid, gridspec = parse_gridspec_with_name(GRID_NAME)
-    dss = bin_dataset_stream(gridspec, scenes, cells, persist=persist)
+    dss = bin_dataset_stream(gridspec=GRIDSPEC, dss=scenes, cells=cells, persist=persist)
 
     with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
         for _ in dss:
