@@ -25,7 +25,8 @@ dependencies = [
     "s3fs",
     "geopandas",
     "datacube",
-    "pystac-client"
+    "python-dotenv",
+    "odc-stats",
 
 ]
 
