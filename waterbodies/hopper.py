@@ -18,40 +18,6 @@ GRID_NAME = "africa_30"
 _log = logging.getLogger(__name__)
 
 
-def find_datasets_by_creation_date(
-    product: str,
-    start_date: datetime.date,
-    end_date: datetime.date,
-    dc: Datacube,
-) -> list[Dataset]:
-    """
-    Search for datasets in the datacube using the creation time metadata
-
-    Parameters
-    ----------
-    product : str
-        Search for datasets belonging to the product.
-    start_date : datetime.date
-        Start date for creation time range.
-    end_date : datetime.date
-        End date for creation time range.
-    dc : Datacube
-
-    Returns
-    -------
-    list[Dataset]
-        Datasets found matching the product and creation time range specified.
-    """
-
-    assert end_date >= start_date
-
-    creation_time_range = (start_date, end_date)
-
-    datasets = dc.find_datasets(product=[product], creation_time=creation_time_range)
-
-    return datasets
-
-
 # From https://github.com/opendatacube/odc-stats/blob/develop/odc/stats/tasks.py
 def update_start_end(x: datetime, out: SimpleNamespace):
     """
