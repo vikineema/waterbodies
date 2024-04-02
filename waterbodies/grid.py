@@ -6,5 +6,11 @@ class WaterbodiesGrid:
     def __init__(self):
         self.gridname = "waterbodies_grid"
         self.gridspec = GridSpec(
-            crs="EPSG:6933", tile_shape=(96000.0, 96000.0), resolution=Resolution(x=30, y=-30)
+            crs="EPSG:6933",
+            tile_shape=(96000.0, 96000.0),
+            resolution=Resolution(x=30, y=-30),
+            origin=(
+                -17376000,
+                -7392000,
+            ),
         )
