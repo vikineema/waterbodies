@@ -47,3 +47,12 @@ def parse_tile_id_from_filename(file_path: str) -> tuple[int]:
 
     tile_id = parse_tile_id_from_str(string_=file_name)
     return tile_id
+
+
+def tile_id_tuple_to_str(tile_id_tuple: tuple[int, int]) -> str:
+
+    tile_id_x, tile_id_y = tile_id_tuple
+
+    tile_id_str = f"x{tile_id_x:03d}_y{tile_id_y:03d}"
+
+    return tile_id_str
