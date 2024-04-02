@@ -54,32 +54,37 @@ def get_last_waterbody_observation_date(engine: Engine) -> datetime:
     return last_observation_date
 
 
-def mask_wofl(wofl: xr.DataArray) -> xr.DataArray:
+def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
     """
-    Apply WOfS bitmasking to a WOfS Feature Layers .water DataArray
+    Apply WOfS bitmasking to a WOfS Feature Layers dataset
     to obtain a masked DataArray with the values:
         1 = water
         0 = dry
         np.nan = invalid (not wet or dry)
 
     Parameters
-    ----------
-    wofl : xr.DataArray
-        WOfS Feature Layers .water DataArray to mask
+    ----------wofl
+    wofl : xr.Dataset
+        WOfS Feature Layers dataset to mask
 
     Returns
     -------
     xr.DataArray
         Masked WOfS Feature Layers .water DataArray
     """
-    clear_and_wet = wofl == 128
-    clear_and_dry = wofl == 0
+    keep_attrs = wofl.attrs
+
+    clear_and_wet = wofl.water == 128
+    clear_and_dry = wofl.water == 0
 
     clear = clear_and_wet | clear_and_dry
 
     # Set the invalid (not clear) pixels to np.nan
     # Remaining values will be 1 if water, 0 if dry
     wofl_masked = clear_and_wet.where(clear)
+
+    wofl_masked.attrs = keep_attrs
+
     return wofl_masked
 
 
