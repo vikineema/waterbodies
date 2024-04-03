@@ -7,12 +7,11 @@ import toolz
 from datacube import Datacube
 from datacube.model import Dataset
 from odc.dscache.tools import bin_dataset_stream
-from odc.dscache.tools.tiling import parse_gridspec_with_name
 from odc.stats.tasks import CompressedDataset, compress_ds
 from odc.stats.utils import Cell
 from tqdm import tqdm
 
-_, GRIDSPEC = parse_gridspec_with_name("africa_30")
+from waterbodies.grid import WaterbodiesGrid
 
 dt_range = SimpleNamespace(start=None, end=None)
 _log = logging.getLogger(__name__)
@@ -103,7 +102,9 @@ def create_tasks_from_scenes(
 
     cells = {}
 
-    dss = bin_dataset_stream(gridspec=GRIDSPEC, dss=scenes, cells=cells, persist=persist)
+    dss = bin_dataset_stream(
+        gridspec=WaterbodiesGrid().gridspec, dss=scenes, cells=cells, persist=persist
+    )
 
     with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
         for _ in dss:
@@ -165,7 +166,7 @@ def find_datasets_by_task_id(
     period, tile_id_x, tile_idy = task_id
     tile_id = (tile_id_x, tile_idy)
 
-    tile_geobox = GRIDSPEC.tile_geobox(tile_index=tile_id)
+    tile_geobox = WaterbodiesGrid().gridspec.tile_geobox(tile_index=tile_id)
 
     scenes = dc.find_datasets(
         product=product, time=(period), like=tile_geobox, group_by="solar_day"
