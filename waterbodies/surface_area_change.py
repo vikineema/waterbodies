@@ -8,7 +8,7 @@ import rioxarray
 import xarray as xr
 from datacube import Datacube
 from skimage.measure import regionprops
-from sqlalchemy import func
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import Table
@@ -195,8 +195,8 @@ def get_waterbody_observations(
         [
             "obs_id",
             "task_id",
-            "date",
             "uid",
+            "date",
             "px_total",
             "px_wet",
             "area_wet_m2",
@@ -207,3 +207,100 @@ def get_waterbody_observations(
         ]
     ]
     return waterbody_observations
+
+
+def add_waterbody_observations_to_db(
+    waterbody_observations: pd.DataFrame,
+    engine: Engine,
+    update_rows: bool = True,
+):
+    """
+    Add waterbody observations to the waterbodies observations table.
+
+    Parameters
+    ----------
+    waterbody_observations : pd.DataFrame
+        Table containing the waterbody observations to add to the database
+    engine : Engine
+    update_rows : bool, optional
+        If True if the a waterbody observation id already exists in the table, the row
+        will be updated else it will be skipped, by default True
+    """
+
+    # Ensure the waterbodies observation table exists.
+    table = create_waterbodies_observations_table(engine=engine)
+
+    Session = sessionmaker(bind=engine)
+
+    # Note: Doing it this way because drill outputs can be millions of rows.
+    # Its best to do it in small batches.
+    obs_ids_to_check = waterbody_observations["obs_id"].to_list()
+    with Session.begin() as session:
+        obs_ids_exist = session.scalars(
+            select(table.c.obs_id).where(table.c.obs_id.in_(obs_ids_to_check))
+        ).all()
+        _log.info(
+            f"Found {len(obs_ids_exist)} waterbodty observtions UIDs in the {table.name} table"
+        )
+
+    update_statements = []
+    insert_parameters = []
+
+    for row in waterbody_observations.itertuples():
+        if row.obs_id not in obs_ids_exist:
+            insert_parameters.append(
+                dict(
+                    obs_id=row.obs_id,
+                    task_id=row.task_id,
+                    date=row.date,
+                    uid=row.uid,
+                    px_total=row.px_total,
+                    px_wet=row.px_wet,
+                    area_wet_m2=row.area_wet_m2,
+                    px_dry=row.px_dry,
+                    area_dry_m2=row.area_dry_m2,
+                    px_invalid=row.px_invalid,
+                    area_invalid_m2=row.area_invalid_m2,
+                )
+            )
+        else:
+            if update_rows:
+                update_statements.append(
+                    update(table)
+                    .where(table.c.obs_id == row.obs_id)
+                    .values(
+                        dict(
+                            task_id=row.task_id,
+                            date=row.date,
+                            uid=row.uid,
+                            px_total=row.px_total,
+                            px_wet=row.px_wet,
+                            area_wet_m2=row.area_wet_m2,
+                            px_dry=row.px_dry,
+                            area_dry_m2=row.area_dry_m2,
+                            px_invalid=row.px_invalid,
+                            area_invalid_m2=row.area_invalid_m2,
+                        )
+                    )
+                )
+            else:
+                continue
+
+    if update_statements:
+        _log.info(
+            f"Updating {len(update_statements)} waterbody observations in the {table.name} table"
+        )
+        with Session.begin() as session:
+            for statement in update_statements:
+                session.execute(statement)
+    else:
+        _log.info(f"No waterbody observations to update in the {table.name} table")
+
+    if insert_parameters:
+        _log.info(
+            f"Adding {len(insert_parameters)} waterbody observations to the {table.name} table"
+        )
+        with Session.begin() as session:
+            session.execute(insert(table), insert_parameters)
+    else:
+        _log.error(f"No waterbody observations to insert into the {table.name} table")
