@@ -188,11 +188,14 @@ def get_waterbody_observations(
     waterbody_observations["obs_id"] = waterbody_observations["uid"].apply(
         lambda x: f"{task_id_str}_{x}"
     )
+    waterbody_observations["task_id"] = [task_id_str]
 
     # Reorder how the columns appear
     waterbody_observations = waterbody_observations[
         [
             "obs_id",
+            "task_id",
+            "date",
             "uid",
             "px_total",
             "px_wet",
@@ -201,7 +204,6 @@ def get_waterbody_observations(
             "area_dry_m2",
             "px_invalid",
             "area_invalid_m2",
-            "date",
         ]
     ]
     return waterbody_observations
