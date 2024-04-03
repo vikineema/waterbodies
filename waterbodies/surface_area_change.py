@@ -239,9 +239,7 @@ def add_waterbody_observations_to_db(
         obs_ids_exist = session.scalars(
             select(table.c.obs_id).where(table.c.obs_id.in_(obs_ids_to_check))
         ).all()
-        _log.info(
-            f"Found {len(obs_ids_exist)} waterbody observations in the {table.name} table"
-        )
+        _log.info(f"Found {len(obs_ids_exist)} waterbody observations in the {table.name} table")
 
     update_statements = []
     insert_parameters = []
@@ -304,3 +302,27 @@ def add_waterbody_observations_to_db(
             session.execute(insert(table), insert_parameters)
     else:
         _log.error(f"No waterbody observations to insert into the {table.name} table")
+
+
+def check_if_task_exists(
+    task: dict[tuple[str, int, int], list[str]],
+    engine: Engine,
+):
+    Session = sessionmaker(bind=engine)
+
+    assert len(task) == 1
+    task_id, task_datasets_ids = next(iter(task.items()))
+
+    task_id_str = task_id_tuple_to_str(task_id)
+
+    table = create_waterbodies_observations_table(engine=engine)
+
+    with Session.begin() as session:
+        task_exists = session.scalars(
+            select(table.c.task_id).where(table.c.task_id == task_id_str)
+        ).first()
+
+    if task_exists:
+        return True
+    else:
+        return False
