@@ -171,6 +171,15 @@ def get_waterbody_observations(
         poly_pixel_counts_df.index = [wbid_to_uid[str(region_prop.label)]]
         polygons_pixel_counts.append(poly_pixel_counts_df)
 
-    polygons_pixel_counts_df = pd.concat(polygons_pixel_counts, ignore_index=False)
+    waterbody_observations = pd.concat(polygons_pixel_counts, ignore_index=False)
 
-    return polygons_pixel_counts_df
+    px_area = abs(
+        historical_extent_raster.geobox.resolution[0]
+        * historical_extent_raster.geobox.resolution[1]
+    )
+
+    waterbody_observations["area_invalid_m2"] = waterbody_observations["px_invalid"] * px_area
+    waterbody_observations["area_dry_m2"] = waterbody_observations["px_dry"] * px_area
+    waterbody_observations["area_wet_m2"] = waterbody_observations["px_wet"] * px_area
+
+    return waterbody_observations
