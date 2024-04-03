@@ -5,8 +5,8 @@ import os
 import click
 import geopandas as gpd
 import rioxarray
-from odc.geo.geom import BoundingBox, Geometry
-from odc.geo.xr import to_cog, wrap_xr, write_cog
+from odc.geo.geom import Geometry
+from odc.geo.xr import wrap_xr
 from rasterio.features import rasterize
 from tqdm import tqdm
 
