@@ -126,6 +126,24 @@ def get_waterbody_observations(
     historical_extent_rasters_directory: str,
     dc: Datacube,
 ) -> pd.DataFrame:
+    """
+    Generate the waterbody observations for a given task
+
+    Parameters
+    ----------
+    task : dict[tuple[str, int, int], list[str]]
+        Task to process.
+    historical_extent_rasters_directory : str
+        Directory containing the historical extent rasters.
+    dc : Datacube
+        Datacube connection
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame table containing the waterbody observations for the task
+
+    """
 
     assert len(task) == 1
     task_id, task_datasets_ids = next(iter(task.items()))
@@ -307,7 +325,23 @@ def add_waterbody_observations_to_db(
 def check_if_task_exists(
     task: dict[tuple[str, int, int], list[str]],
     engine: Engine,
-):
+) -> bool:
+    """
+    Check if a task already exists in the database by checking if
+    any observation has a matching task id.
+
+    Parameters
+    ----------
+    task : dict[tuple[str, int, int], list[str]]
+        Task to check for.
+    engine : Engine
+
+    Returns
+    -------
+    bool
+        True if a single observation with a matching task id has been found
+        False if not.
+    """
     Session = sessionmaker(bind=engine)
 
     assert len(task) == 1

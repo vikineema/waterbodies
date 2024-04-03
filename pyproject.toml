@@ -27,6 +27,7 @@ dependencies = [
     "datacube",
     "python-dotenv",
     "odc-stats",
+    "rioxarray"
 
 ]
 
