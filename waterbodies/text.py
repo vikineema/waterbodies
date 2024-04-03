@@ -56,3 +56,12 @@ def tile_id_tuple_to_str(tile_id_tuple: tuple[int, int]) -> str:
     tile_id_str = f"x{tile_id_x:03d}_y{tile_id_y:03d}"
 
     return tile_id_str
+
+
+def task_id_tuple_to_str(task_id_tuple: tuple[str, int, int]) -> str:
+
+    solar_day, tile_id_x, tile_id_y = task_id_tuple
+
+    task_id_str = f"{solar_day}/x{tile_id_x:03d}/y{tile_id_y:03d}"
+
+    return task_id_str
