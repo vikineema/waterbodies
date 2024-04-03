@@ -35,6 +35,7 @@ class WaterbodyObservation(WaterbodyBase):
     px_invalid: Mapped[float]
     area_invalid_m2: Mapped[float]
     date: Mapped[datetime]
+    task_id: Mapped[str]
 
     def __repr__(self) -> str:
         return (
