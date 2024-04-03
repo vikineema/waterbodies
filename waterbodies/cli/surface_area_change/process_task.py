@@ -15,7 +15,7 @@ from waterbodies.surface_area_change import (
 
 @click.command(
     name="process-task",
-    help="Process a task to generate waterbody observations.",
+    help="Process a single task to generate waterbody observations.",
     no_args_is_help=True,
 )
 @click.option("-v", "--verbose", default=1, count=True)
