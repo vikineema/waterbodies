@@ -2,11 +2,13 @@ import datetime
 import logging
 from itertools import chain
 from types import SimpleNamespace
+from warnings import warn
 
 import toolz
 from datacube import Datacube
 from datacube.model import Dataset
-from odc.dscache.tools import bin_dataset_stream
+from odc.dscache.tools import solar_offset
+from odc.geo.geom import Geometry
 from odc.stats.tasks import CompressedDataset, compress_ds
 from odc.stats.utils import Cell
 from tqdm import tqdm
@@ -15,6 +17,58 @@ from waterbodies.grid import WaterbodiesGrid
 
 dt_range = SimpleNamespace(start=None, end=None)
 _log = logging.getLogger(__name__)
+
+
+# Copied from
+# https://github.com/opendatacube/odc-dscache/blob/35c2f46e10f5b6cd64ae974b48f11ae2c34141d2/odc/dscache/tools/_index.py#L180C5-L180C23
+# becuase of difference in behaviour between datacube.utils.geometry.Geometry
+# and odc.geo.geom.Geometry
+def bin_dataset_stream(gridspec, dss, cells, persist=None):
+    """
+    Intersect Grid Spec cells with Datasets.
+
+    :param gridspec: GridSpec
+    :param dss: Sequence of datasets (can be lazy)
+    :param cells: Dictionary to populate with tiles
+    :param persist: Dataset -> SomeThing mapping, defaults to keeping dataset id only
+
+    The ``cells`` dictionary is a mapping from (x,y) tile index to object with the
+    following properties:
+
+     .idx     - tile index (x,y)
+     .geobox  - tile geobox
+     .utc_offset - timedelta to add to timestamp to get day component in local time
+     .dss     - list of UUIDs, or results of ``persist(dataset)`` if custom ``persist`` is supplied
+    """
+    geobox_cache = {}
+
+    def default_persist(ds):
+        return ds.id
+
+    def register(tile, geobox, val):
+        cell = cells.get(tile)
+        if cell is None:
+            utc_ofset = solar_offset(geobox.extent)
+            cells[tile] = SimpleNamespace(geobox=geobox, idx=tile, utc_offset=utc_ofset, dss=[val])
+        else:
+            cell.dss.append(val)
+
+    if persist is None:
+        persist = default_persist
+
+    for ds in dss:
+        ds_val = persist(ds)
+
+        if ds.extent is None:
+            warn(f"Dataset without extent info: {str(ds.id)}")
+            continue
+
+        for tile, geobox in gridspec.tiles_from_geopolygon(
+            geopolygon=Geometry(geom=ds.extent.geom, crs=ds.extent.crs), geobox_cache=geobox_cache
+        ):
+            register(tile, geobox, ds_val)
+
+        yield ds
 
 
 # From https://github.com/opendatacube/odc-stats/blob/develop/odc/stats/tasks.py
