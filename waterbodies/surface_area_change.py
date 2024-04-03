@@ -188,7 +188,7 @@ def get_waterbody_observations(
     waterbody_observations["obs_id"] = waterbody_observations["uid"].apply(
         lambda x: f"{task_id_str}_{x}"
     )
-    waterbody_observations["task_id"] = [task_id_str]
+    waterbody_observations["task_id"] = task_id_str
 
     # Reorder how the columns appear
     waterbody_observations = waterbody_observations[
@@ -207,3 +207,20 @@ def get_waterbody_observations(
         ]
     ]
     return waterbody_observations
+
+
+
+
+def add_waterbody_observations_to_db(
+    waterbody_observations: pd.DataFrame,
+    engine: Engine,
+):
+    # Ensure the waterbodies observation table exists.
+    table = create_waterbodies_observations_table(engine=engine)
+
+    Session = sessionmaker(bind=engine)
+
+    # Get the observation ids.abs
+    obs_ids_to_check = waterbody_observations["obs_id"].to_list()
+
+    with Session.begin() as session:
