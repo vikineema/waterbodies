@@ -16,7 +16,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.io import find_geotiff_files
-from waterbodies.text import tile_id_tuple_to_str
+from waterbodies.text import task_id_tuple_to_str, tile_id_tuple_to_str
 
 _log = logging.getLogger(__name__)
 
@@ -131,7 +131,9 @@ def get_waterbody_observations(
     task_id, task_datasets_ids = next(iter(task.items()))
 
     solar_day, tile_id_x, tile_id_y = task_id
+
     tile_id_str = tile_id_tuple_to_str((tile_id_x, tile_id_y))
+    task_id_str = task_id_tuple_to_str(task_id)
 
     historical_extent_raster_file = find_geotiff_files(
         directory_path=historical_extent_rasters_directory,
@@ -168,7 +170,7 @@ def get_waterbody_observations(
     polygons_pixel_counts = []
     for region_prop in region_properties:
         poly_pixel_counts_df = region_prop.get_pixel_counts
-        poly_pixel_counts_df.index = [wbid_to_uid[str(region_prop.label)]]
+        poly_pixel_counts_df["uid"] = [wbid_to_uid[str(region_prop.label)]]
         polygons_pixel_counts.append(poly_pixel_counts_df)
 
     waterbody_observations = pd.concat(polygons_pixel_counts, ignore_index=False)
@@ -182,4 +184,8 @@ def get_waterbody_observations(
     waterbody_observations["area_dry_m2"] = waterbody_observations["px_dry"] * px_area
     waterbody_observations["area_wet_m2"] = waterbody_observations["px_wet"] * px_area
 
+    waterbody_observations["date"] = pd.to_datetime(solar_day)
+    waterbody_observations["obs_id"] = waterbody_observations["uid"].apply(
+        lambda x: f"{task_id_str}_{x}"
+    )
     return waterbody_observations
