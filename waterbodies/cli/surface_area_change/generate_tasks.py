@@ -13,7 +13,7 @@ from waterbodies.surface_area_change import get_last_waterbody_observation_date
 from waterbodies.text import parse_tile_id_from_filename
 
 
-@click.command(name="generate-tiles", help="Generate tiles to run.", no_args_is_help=True)
+@click.command(name="generate-tasks", help="Generate tasks to run.", no_args_is_help=True)
 @click.option("-v", "--verbose", default=1, count=True)
 @click.option(
     "--temporal-range",
@@ -31,7 +31,7 @@ from waterbodies.text import parse_tile_id_from_filename
     type=str,
     help="Path to the directory containing the historical extent raster files.",
 )
-def generate_tiles(
+def generate_tasks(
     verbose,
     temporal_range,
     run_type,
