@@ -4,7 +4,7 @@ import os
 
 import click
 import geopandas as gpd
-import rioxarray
+import rioxarray  # noqa F401
 from odc.geo.geom import Geometry
 from odc.geo.xr import wrap_xr
 from rasterio.features import rasterize
