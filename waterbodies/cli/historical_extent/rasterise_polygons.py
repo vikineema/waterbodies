@@ -22,7 +22,11 @@ from waterbodies.logs import logging_setup
 from waterbodies.text import tile_id_tuple_to_str
 
 
-@click.command(name="generate-tiles", help="Generate tiles to run.", no_args_is_help=True)
+@click.command(
+    name="rasterise-polygons",
+    help="Rasterise historical extent polygons by tile.",
+    no_args_is_help=True,
+)
 @click.option("-v", "--verbose", default=1, count=True)
 @click.option(
     "--historical-extent-rasters-directory",
