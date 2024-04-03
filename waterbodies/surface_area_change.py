@@ -240,7 +240,7 @@ def add_waterbody_observations_to_db(
             select(table.c.obs_id).where(table.c.obs_id.in_(obs_ids_to_check))
         ).all()
         _log.info(
-            f"Found {len(obs_ids_exist)} waterbodty observtions UIDs in the {table.name} table"
+            f"Found {len(obs_ids_exist)} waterbody observations in the {table.name} table"
         )
 
     update_statements = []
