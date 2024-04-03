@@ -1,8 +1,13 @@
 import datetime
+import json
 import logging
 
+import numpy as np
+import pandas as pd
 import rioxarray
 import xarray as xr
+from datacube import Datacube
+from skimage.measure import regionprops
 from sqlalchemy import func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
@@ -11,6 +16,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.io import find_geotiff_files
+from waterbodies.text import tile_id_tuple_to_str
 
 _log = logging.getLogger(__name__)
 
@@ -88,27 +94,83 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
     return wofl_masked
 
 
+def get_pixel_counts(region_mask, intensity_image):
+
+    masked_intensity_image = intensity_image[region_mask]
+
+    dry_pixel_value = 0
+    wet_pixel_value = 1
+    invalid_pixel_value = -9999
+
+    unique_values, unique_value_counts = np.unique(masked_intensity_image, return_counts=True)
+    unique_values = np.where(np.isnan(unique_values), invalid_pixel_value, unique_values)
+    unique_values_and_counts = dict(zip(unique_values, unique_value_counts))
+
+    px_total = np.sum(unique_value_counts)
+    px_invalid = unique_values_and_counts.get(invalid_pixel_value, np.nan)
+    px_dry = unique_values_and_counts.get(dry_pixel_value, np.nan)
+    px_wet = unique_values_and_counts.get(wet_pixel_value, np.nan)
+
+    pixel_counts = {
+        "px_total": [px_total],
+        "px_invalid": [px_invalid],
+        "px_dry": [px_dry],
+        "px_wet": [px_wet],
+    }
+    pixel_counts_df = pd.DataFrame(pixel_counts)
+    return pixel_counts_df
+
+
 def get_waterbody_observations(
     task: dict[tuple[str, int, int], list[str]],
     historical_extent_rasters_directory: str,
-):
+    dc: Datacube,
+) -> pd.DataFrame:
 
+    assert len(task) == 1
     task_id, task_datasets_ids = next(iter(task.items()))
 
     solar_day, tile_id_x, tile_id_y = task_id
+    tile_id_str = tile_id_tuple_to_str((tile_id_x, tile_id_y))
 
-    historical_extent_raster = find_geotiff_files(
+    historical_extent_raster_file = find_geotiff_files(
         directory_path=historical_extent_rasters_directory,
-        file_name_pattern=f"x{tile_id_x:03}_y{tile_id_y:03}",
+        file_name_pattern=tile_id_str,
     )
-    if not historical_extent_raster:
+    if historical_extent_raster_file:
+        historical_extent_raster = rioxarray.open_rasterio(
+            historical_extent_raster_file[0]
+        ).squeeze("band", drop=True)
+        # Get the mapping of WB_ID to UID from the attributes.
+        wbid_to_uid = json.loads(historical_extent_raster.attrs["WB_ID_to_UID"])
+    else:
         e = FileNotFoundError(
-            f"Tile {(tile_id_x, tile_id_y)} does not have a historical extent "
+            f"Tile {tile_id_str} does not have a historical extent "
             f"raster in the directory {historical_extent_rasters_directory}"
         )
         _log.error(e)
         raise e
-    else:
-        historical_extent_raster_da = rioxarray.open_rasterio(historical_extent_raster[0]).squeeze(
-            "band", drop=True
-        )
+
+    task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
+
+    ds = dc.load(
+        datasets=task_datasets, like=historical_extent_raster.geobox, group_by="solar_day"
+    ).squeeze()
+
+    da = mask_wofl(ds)
+
+    region_properties = regionprops(
+        label_image=historical_extent_raster.values,
+        intensity_image=da.values,
+        extra_properties=[get_pixel_counts],
+    )
+
+    polygons_pixel_counts = []
+    for region_prop in region_properties:
+        poly_pixel_counts_df = region_prop.get_pixel_counts
+        poly_pixel_counts_df.index = [wbid_to_uid[str(region_prop.label)]]
+        polygons_pixel_counts.append(poly_pixel_counts_df)
+
+    polygons_pixel_counts_df = pd.concat(polygons_pixel_counts, ignore_index=False)
+
+    return polygons_pixel_counts_df
