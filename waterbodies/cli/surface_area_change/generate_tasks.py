@@ -1,17 +1,14 @@
 import json
 import logging
 import sys
-from datetime import datetime
 
 import click
 from datacube import Datacube
 from odc.stats.model import DateTimeRange
 
-from waterbodies.db import get_waterbodies_engine
 from waterbodies.hopper import create_tasks_from_scenes
 from waterbodies.io import check_directory_exists, find_geotiff_files
 from waterbodies.logs import logging_setup
-from waterbodies.surface_area_change import get_last_waterbody_observation_date
 from waterbodies.text import parse_tile_id_from_filename
 
 
@@ -21,12 +18,21 @@ from waterbodies.text import parse_tile_id_from_filename
     "--temporal-range",
     type=str,
     help=(
-        "Only extract datasets for a given time range," "Example '2020-05--P1M' month of May 2020"
+        "Only extract datasets for a given time range, e.g. '2020-05--P1M' month of May 2020. "
+        "For backlog-processing this will query datasets by their acquisition time. "
+        "For gap-filling this will query datasets by their creation time."
     ),
 )
 @click.option(
     "--run-type",
-    type=click.Choice(["gap-filling", "backlog-processing", "regular-update"], case_sensitive=True),
+    default="backlog-processing",
+    type=click.Choice(
+        [
+            "backlog-processing",
+            "gap-filling",
+        ],
+        case_sensitive=True,
+    ),
 )
 @click.option(
     "--historical-extent-rasters-directory",
@@ -42,8 +48,7 @@ def generate_tasks(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    if run_type != "regular-update":
-        temporal_range_ = DateTimeRange(temporal_range)
+    temporal_range_ = DateTimeRange(temporal_range)
 
     if not check_directory_exists(path=historical_extent_rasters_directory):
         e = FileNotFoundError(f"Directory {historical_extent_rasters_directory} does not exist!")
@@ -70,25 +75,9 @@ def generate_tasks(
         scenes = dc.find_datasets(**dc_query)
         tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=tile_ids_of_interest)
 
-    elif run_type == "regular-update":
-        # Connect to the waterbodies engine
-        engine = get_waterbodies_engine()
-        # TODO: Check if this should be done here or should the time range be defined outside
-        # this step then passed as to temporal-range parameter for this step
-        # Get the date of the most recent waterbody observation
-        last_observation_date = get_last_waterbody_observation_date(engine=engine)
-        today = datetime.now()
-
-        dc = Datacube(app="regular-update")
-        dc_query = dict(product=product, time=(last_observation_date, today))
-        # Search the datacube for all wofs_ls datasets whose acquisition times fall within
-        # the temporal range specified.
-        scenes = dc.find_datasets(**dc_query)
-        tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=tile_ids_of_interest)
-
     elif run_type == "gap-filling":
         dc = Datacube(app="gap-filling")
-        # The difference between gap-filling and the other steps is here
+        # The difference between gap-filling and the bcklog-processing is here
         # we are searching for datasets by their creation date (`creation_time`),
         # not their acquisition date (`time`).
         dc_query = dict(product=product, creation_time=(temporal_range_.start, temporal_range_.end))
@@ -110,4 +99,4 @@ def generate_tasks(
         # looping over each task to update the required task dataset ids here.
         tasks = [{task_id: []} for task_id in task_ids]
 
-        json.dump(tasks, sys.stdout)
+    json.dump(tasks, sys.stdout)
