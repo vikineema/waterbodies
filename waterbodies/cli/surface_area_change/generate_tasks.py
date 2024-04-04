@@ -1,4 +1,6 @@
+import json
 import logging
+import sys
 from datetime import datetime
 
 import click
@@ -108,4 +110,4 @@ def generate_tasks(
         # looping over each task to update the required task dataset ids here.
         tasks = [{task_id: []} for task_id in task_ids]
 
-    return tasks
+        json.dump(tasks, sys.stdout)
