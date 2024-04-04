@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "waterbodies"
-version = "0.0.1"
+# version = "0.0.1"
 authors = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
 maintainers = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
 description = "DE Africa waterbodies"
@@ -14,18 +14,24 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = ">=3.9"
-dynamic = ["dependencies"]
-
+dynamic = ["version", "dependencies"]
 
 [project.urls]
 Repository = "https://github.com/digitalearthafrica/waterbodies.git"
 "Bug Tracker" = "https://github.com/digitalearthafrica/waterbodies/issues"
+
+[project.scripts]
+waterbodies = "waterbodies.cli.main:waterbodies"
 
 [tool.setuptools]
 packages = ["waterbodies"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.in"] }
+version = {attr = "waterbodies._version.version"}
+
+[tool.setuptools_scm]
+version_file = "waterbodies/_version.py"
 
 [tool.isort]
 profile = "black"
@@ -33,5 +39,3 @@ profile = "black"
 [tool.black]
 line-length = 100
 
-[project.scripts]
-waterbodies = "waterbodies.cli.main:waterbodies"
