@@ -14,32 +14,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 requires-python = ">=3.9"
-dependencies = [
-    "black[jupyter]",
-    "click",
-    "datacube",
-    "flake8",
-    "fsspec",
-    "geoalchemy2",
-    "geopandas",
-    "isort >= 5.0.0",
-    "mypy",
-    "numpy ",
-    "odc-dscache",
-    "odc-geo",
-    "odc-stats",
-    "pandas",
-    "python-dotenv",
-    "rasterio",
-    "rioxarray",
-    "s3fs",
-    "scikit-image",
-    "sqlalchemy",
-    "toolz",
-    "tqdm",
-    "xarray",
+dynamic = ["dependencies"]
 
-]
 
 [project.urls]
 Repository = "https://github.com/digitalearthafrica/waterbodies.git"
@@ -47,6 +23,9 @@ Repository = "https://github.com/digitalearthafrica/waterbodies.git"
 
 [tool.setuptools]
 packages = ["waterbodies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.in"] }
 
 [tool.isort]
 profile = "black"

@@ -1,0 +1,25 @@
+black[jupyter]
+click
+datacube
+flake8
+fsspec
+geoalchemy2
+geopandas
+isort>=5.0.0
+mypy
+numpy 
+odc-dscache
+odc-geo
+odc-stats
+pandas
+python-dotenv
+rasterio
+rioxarray
+s3fs
+scikit-image
+sqlalchemy<2.0
+toolz
+tqdm
+xarray
+# To match osgeo/gdal:ubuntu-small-3.6.3 in Dockerfile
+gdal==3.6.3
