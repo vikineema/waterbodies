@@ -23,3 +23,5 @@ tqdm
 xarray
 # To match osgeo/gdal:ubuntu-small-3.6.3 in Dockerfile
 gdal==3.6.3
+# Required by index_tiles.sh
+odc-apps-dc-tools
