@@ -16,18 +16,28 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
     "black[jupyter]",
-    "isort >= 5.0.0",
-    "flake8",
-    "mypy",
-    "sqlalchemy",
-    "geoalchemy2",
-    "fsspec",
-    "s3fs",
-    "geopandas",
+    "click",
     "datacube",
-    "python-dotenv",
+    "flake8",
+    "fsspec",
+    "geoalchemy2",
+    "geopandas",
+    "isort >= 5.0.0",
+    "mypy",
+    "numpy ",
+    "odc-dscache",
+    "odc-geo",
     "odc-stats",
-    "rioxarray"
+    "pandas",
+    "python-dotenv",
+    "rasterio",
+    "rioxarray",
+    "s3fs",
+    "scikit-image",
+    "sqlalchemy",
+    "toolz",
+    "tqdm",
+    "xarray",
 
 ]
 
