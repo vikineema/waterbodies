@@ -195,35 +195,39 @@ def create_tasks_from_scenes(
     return tasks
 
 
-def find_datasets_by_task_id(
+def find_task_datasets_ids(
     task_id: tuple[str, int, int],
     dc: Datacube,
     product: str,
-) -> list[Dataset]:
+) -> list[str]:
     """
-    Find all scenes overlapping with a tasks
+    Find all dataset ids given a task id.
 
     Parameters
     ----------
     task_id : tuple[str, int, int]
         Task id containing the solar day and tile x and y id
     dc : Datacube
+        Datacube connection
     product : str
         Search for datasets belonging to the product.
 
     Returns
     -------
-    list[Dataset]task
-        Scenes covering the tile x and y id and matching the period in  the task id.
+    list[str]
+        IDs for all the datasets that match the task id.
     """
 
-    period, tile_id_x, tile_idy = task_id
-    tile_id = (tile_id_x, tile_idy)
+    solar_day, tile_id_x, tile_id_y = task_id
+
+    tile_id = (tile_id_x, tile_id_y)
 
     tile_geobox = WaterbodiesGrid().gridspec.tile_geobox(tile_index=tile_id)
 
-    scenes = dc.find_datasets(
-        product=product, time=(period), like=tile_geobox, group_by="solar_day"
+    task_datasets = dc.find_datasets(
+        product=product, time=(solar_day), like=tile_geobox, group_by="solar_day"
     )
 
-    return scenes
+    task_datasets_ids = [ds.id for ds in task_datasets]
+
+    return task_datasets_ids
