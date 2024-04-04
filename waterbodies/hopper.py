@@ -1,8 +1,6 @@
 import datetime
 import logging
-from itertools import chain
 from types import SimpleNamespace
-from uuid import UUID
 from warnings import warn
 
 import toolz
@@ -131,11 +129,11 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     # Duplicates occur when queried datasets are captured around UTC midnight
     # and around weekly boundary
     # From the compressed datasets keep only the dataset uuids
-    tasks = {task_id: [ds.id for ds in set(dss)] for task_id, dss in tasks.items()}
+    tasks = {task_id: [str(ds.id) for ds in set(dss)] for task_id, dss in tasks.items()}
     return tasks
 
 
-def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[UUID]) -> dict:
+def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[str]) -> dict:
     """
     Create a task in given a task id and the task's datasets' ids.
 
@@ -143,8 +141,8 @@ def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[UUID]) ->
     ----------
     task_id : tuple[str, int, int]
         ID for the task
-    task_datasets_ids : list[UUID]
-        Datasets' ids for the task.
+    task_datasets_ids : list[str]
+        IDs for the task's datasets
 
     Returns
     -------
