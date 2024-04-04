@@ -28,7 +28,7 @@ packages = ["waterbodies"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.in"] }
-version = {attr = "waterbodies._version.version"}
+version = {attr = "waterbodies.__version__"}
 
 [tool.setuptools_scm]
 version_file = "waterbodies/_version.py"
