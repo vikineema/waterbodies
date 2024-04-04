@@ -2,6 +2,7 @@ import datetime
 import logging
 from itertools import chain
 from types import SimpleNamespace
+from uuid import UUID
 from warnings import warn
 
 import toolz
@@ -134,9 +135,38 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     return tasks
 
 
+def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[UUID]) -> dict:
+    """
+    Create a task in given a task id and the task's datasets' ids.
+
+    Parameters
+    ----------
+    task_id : tuple[str, int, int]
+        ID for the task
+    task_datasets_ids : list[UUID]
+        Datasets' ids for the task.
+
+    Returns
+    -------
+    dict
+        Task
+    """
+
+    solar_day, tile_id_x, tile_id_y = task_id
+
+    task = dict(
+        solar_day=solar_day,
+        tile_id_x=tile_id_x,
+        tile_id_y=tile_id_y,
+        task_datasets_ids=task_datasets_ids,
+    )
+
+    return task
+
+
 def create_tasks_from_scenes(
     scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] = []
-) -> list[dict[tuple[str, int, int], list[str]]]:
+) -> list[dict]:
     """
     Create tasks to run from scenes.
 
@@ -149,7 +179,7 @@ def create_tasks_from_scenes(
 
     Returns
     -------
-    list[dict[tuple[str, int, int], list[str]]]
+    list[dict]
         A list of tasks with each tasks containing the task id (solar_day, tile id x, tile id y)
         and Datasets UUID
     """
@@ -180,16 +210,11 @@ def create_tasks_from_scenes(
     tasks = bin_by_solar_day(cells=cells)
 
     # Convert from dictionary to list of dictionaries.
-    tasks = [{task_id: task_datasets} for task_id, task_datasets in tasks.items()]
+    tasks = [
+        create_task(task_id=task_id, task_datasets_ids=task_datasets_ids)
+        for task_id, task_datasets_ids in tasks.items()
+    ]
 
-    no_of_unique_datasets = len(
-        set(
-            chain.from_iterable(
-                [task_datasets for task in tasks for task_id, task_datasets in task.items()]
-            )
-        )
-    )
-    _log.info(f"Total of {no_of_unique_datasets:,d} unique dataset UUIDs.")
     _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
