@@ -65,3 +65,33 @@ def task_id_tuple_to_str(task_id_tuple: tuple[str, int, int]) -> str:
     task_id_str = f"{solar_day}/x{tile_id_x:03d}/y{tile_id_y:03d}"
 
     return task_id_str
+
+
+def format_task(task: dict[tuple[str, int, int], list[str]]) -> dict:
+    """
+    Format task.
+
+    Parameters
+    ----------
+    task : dict[tuple[str, int, int], list[str]]
+        Task to format
+
+    Returns
+    -------
+    dict
+        Task in the correct output format.
+    """
+
+    assert len(task) == 1
+    task_id, task_datasets_ids = next(iter(task.items()))
+
+    solar_day, tile_id_x, tile_id_y = task_id
+
+    task = dict(
+        solar_day=solar_day,
+        tile_id_x=tile_id_x,
+        tile_id_y=tile_id_y,
+        task_datasets_ids=task_datasets_ids,
+    )
+
+    return task
