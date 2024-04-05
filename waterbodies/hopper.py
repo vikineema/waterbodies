@@ -133,35 +133,6 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     return tasks
 
 
-def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[str]) -> dict:
-    """
-    Create a task in given a task id and the task's datasets' ids.
-
-    Parameters
-    ----------
-    task_id : tuple[str, int, int]
-        ID for the task
-    task_datasets_ids : list[str]
-        IDs for the task's datasets
-
-    Returns
-    -------
-    dict
-        Task
-    """
-
-    solar_day, tile_id_x, tile_id_y = task_id
-
-    task = dict(
-        solar_day=solar_day,
-        tile_id_x=tile_id_x,
-        tile_id_y=tile_id_y,
-        task_datasets_ids=task_datasets_ids,
-    )
-
-    return task
-
-
 def create_tasks_from_scenes(
     scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] = []
 ) -> list[dict]:
@@ -213,6 +184,35 @@ def create_tasks_from_scenes(
     _log.info(f"Total number of tasks: {len(tasks)}")
 
     return tasks
+
+
+def create_task(task_id: tuple[str, int, int], task_datasets_ids: list[str]) -> dict:
+    """
+    Create a task in given a task id and the task's datasets' ids.
+
+    Parameters
+    ----------
+    task_id : tuple[str, int, int]
+        ID for the task
+    task_datasets_ids : list[str]
+        IDs for the task's datasets
+
+    Returns
+    -------
+    dict
+        Task
+    """
+
+    solar_day, tile_id_x, tile_id_y = task_id
+
+    task = dict(
+        solar_day=solar_day,
+        tile_id_x=tile_id_x,
+        tile_id_y=tile_id_y,
+        task_datasets_ids=task_datasets_ids,
+    )
+
+    return task
 
 
 def find_task_datasets_ids(
