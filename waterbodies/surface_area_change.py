@@ -263,7 +263,10 @@ def add_waterbody_observations_to_db(
         obs_ids_exist = session.scalars(
             select(table.c.obs_id).where(table.c.obs_id.in_(obs_ids_to_check))
         ).all()
-        _log.info(f"Found {len(obs_ids_exist)} waterbody observations in the {table.name} table")
+        _log.info(
+            f"Found {len(obs_ids_exist)} out of {len(obs_ids_to_check)} waterbody "
+            f"observations already in the {table.name} table"
+        )
 
     update_statements = []
     insert_parameters = []
@@ -320,7 +323,7 @@ def add_waterbody_observations_to_db(
 
     if insert_parameters:
         _log.info(
-            f"Adding {len(insert_parameters)} waterbody observations to the {table.name} table"
+            f"Inerting {len(insert_parameters)} waterbody observations in the {table.name} table"
         )
         with Session.begin() as session:
             session.execute(insert(table), insert_parameters)
