@@ -122,7 +122,10 @@ def get_pixel_counts(region_mask, intensity_image):
 
 
 def get_waterbody_observations(
-    task: dict[tuple[str, int, int], list[str]],
+    solar_day: str,
+    tile_id_x: int,
+    tile_id_y: int,
+    task_datasets_ids: list[str],
     historical_extent_rasters_directory: str,
     dc: Datacube,
 ) -> pd.DataFrame:
@@ -131,8 +134,14 @@ def get_waterbody_observations(
 
     Parameters
     ----------
-    task : dict[tuple[str, int, int], list[str]]
-        Task to process.
+    solar_day : str
+        Solar day part of the task id.
+    tile_id_x : int
+        X tile id part of the task id
+    tile_id_y : int
+        Y tile id part of the task id.
+    task_datasets_ids: list[str]
+        IDs of the datasets for the task
     historical_extent_rasters_directory : str
         Directory containing the historical extent rasters.
     dc : Datacube
@@ -144,14 +153,11 @@ def get_waterbody_observations(
         A DataFrame table containing the waterbody observations for the task
 
     """
+    task_id = (solar_day, tile_id_x, tile_id_y)
+    task_id_str = task_id_tuple_to_str(task_id_tuple=task_id)
 
-    assert len(task) == 1
-    task_id, task_datasets_ids = next(iter(task.items()))
-
-    solar_day, tile_id_x, tile_id_y = task_id
-
-    tile_id_str = tile_id_tuple_to_str((tile_id_x, tile_id_y))
-    task_id_str = task_id_tuple_to_str(task_id)
+    tile_id = (tile_id_x, tile_id_y)
+    tile_id_str = tile_id_tuple_to_str(tile_id_tuple=tile_id)
 
     historical_extent_raster_file = find_geotiff_files(
         directory_path=historical_extent_rasters_directory,
