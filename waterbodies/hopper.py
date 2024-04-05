@@ -204,7 +204,7 @@ def create_tasks_from_scenes(
     else:
         _log.info(f"Total number of cells: {len(cells)}")
 
-    _log.info("For each cell group the datasets by solar day")
+    _log.info("For each cell, group the datasets by solar day")
     tasks = bin_by_solar_day(cells=cells)
 
     # Convert from dictionary to list of dictionaries.
@@ -248,6 +248,6 @@ def find_task_datasets_ids(
         product=product, time=(solar_day), like=tile_geobox, group_by="solar_day"
     )
 
-    task_datasets_ids = [ds.id for ds in task_datasets]
+    task_datasets_ids = [str(ds.id) for ds in task_datasets]
 
     return task_datasets_ids
