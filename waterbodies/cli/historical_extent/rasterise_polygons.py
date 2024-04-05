@@ -19,7 +19,7 @@ from waterbodies.io import (
     load_vector_file,
 )
 from waterbodies.logs import logging_setup
-from waterbodies.text import tile_id_tuple_to_str
+from waterbodies.text import get_tile_id_str_from_tuple
 
 
 @click.command(
@@ -112,6 +112,7 @@ def rasterise_polygons(
                 )
                 # Write the raster to file.
                 raster_path = os.path.join(
-                    historical_extent_rasters_directory, f"{tile_id_tuple_to_str(tile_id)}.tif"
+                    historical_extent_rasters_directory,
+                    f"{get_tile_id_str_from_tuple(tile_id)}.tif",
                 )
                 tile_raster_ds.rio.to_raster(raster_path=raster_path, tags=tags, compute=True)

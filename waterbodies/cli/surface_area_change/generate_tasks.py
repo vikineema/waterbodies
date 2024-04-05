@@ -9,7 +9,7 @@ from odc.stats.model import DateTimeRange
 from waterbodies.hopper import create_tasks_from_scenes
 from waterbodies.io import check_directory_exists, find_geotiff_files
 from waterbodies.logs import logging_setup
-from waterbodies.text import format_task, parse_tile_id_from_filename
+from waterbodies.text import format_task, get_tile_id_tuple_from_filename
 
 
 @click.command(name="generate-tasks", help="Generate tasks to run.", no_args_is_help=True)
@@ -59,7 +59,7 @@ def generate_tasks(
 
     # Get the tile_ids for tiles that actually contain waterbodies.
     tile_ids_of_interest = [
-        parse_tile_id_from_filename(file_path=raster_file)
+        get_tile_id_tuple_from_filename(file_path=raster_file)
         for raster_file in historical_extent_rasters
     ]
 
@@ -86,17 +86,13 @@ def generate_tasks(
         # E.g  a dataset can have an aquisition date of 2023-12-15 but have been added to the
         # datacube in 2024-02, which will be its creation date.
         scenes = dc.find_datasets(**dc_query)
-        # Identify the tasks / waterbody observations affected.
-        affected_tasks = create_tasks_from_scenes(
-            scenes=scenes, tile_ids_of_interest=tile_ids_of_interest
-        )
-        # Get the ids for the affected waterbody observations.
-        task_ids = [
-            task_id for task in affected_tasks for task_id, task_dataset_ids in task.items()
-        ]
-        # For each task id add an empty list as a place holder for the task datasets ids.
-        # This will be filled in the drill function which is easier to do in parallel than
-        # looping over each task to update the required task dataset ids here.
+        # Get the ids of the tasks to process.
+        tasks_ = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=tile_ids_of_interest)
+        task_ids = [task_id for task in tasks_ for task_id, task_dataset_ids in task.items()]
+        # For each task id add an empty list as a place holder for the task's datasets' ids
+        # which will be filled  during processing. This is because the processing step is expected
+        # to be done in parallel hence filling the task's datasets' ids will be faster there than
+        # looping over each task to update the required datasets' ids here.
         tasks = [{task_id: []} for task_id in task_ids]
 
     # Put the tasks in the correct format.

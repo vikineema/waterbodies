@@ -16,7 +16,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.io import find_geotiff_files
-from waterbodies.text import task_id_tuple_to_str, tile_id_tuple_to_str
+from waterbodies.text import get_task_id_str_from_tuple, get_tile_id_str_from_tuple
 
 _log = logging.getLogger(__name__)
 
@@ -154,10 +154,10 @@ def get_waterbody_observations(
 
     """
     task_id = (solar_day, tile_id_x, tile_id_y)
-    task_id_str = task_id_tuple_to_str(task_id_tuple=task_id)
+    task_id_str = get_task_id_str_from_tuple(task_id)
 
     tile_id = (tile_id_x, tile_id_y)
-    tile_id_str = tile_id_tuple_to_str(tile_id_tuple=tile_id)
+    tile_id_str = get_tile_id_str_from_tuple(tile_id)
 
     historical_extent_raster_file = find_geotiff_files(
         directory_path=historical_extent_rasters_directory,
