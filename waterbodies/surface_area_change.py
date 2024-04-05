@@ -331,41 +331,36 @@ def add_waterbody_observations_to_db(
         _log.error(f"No waterbody observations to insert into the {table.name} table")
 
 
-def check_if_task_exists(
-    task: dict[tuple[str, int, int], list[str]],
+def check_task_exists(
+    task_id_str: str,
     engine: Engine,
 ) -> bool:
     """
     Check if a task already exists in the database by checking if
-    any observation has a matching task id.
+    any waterbody observation has a matching task id.
 
     Parameters
     ----------
-    task : dict[tuple[str, int, int], list[str]]
-        Task to check for.
+    task_id_str : str
+        Task id to check for.
     engine : Engine
 
     Returns
     -------
     bool
-        True if a single observation with a matching task id has been found
+        True if a single waterbody observation with a matching task id has been found
         False if not.
     """
     Session = sessionmaker(bind=engine)
 
-    assert len(task) == 1
-    task_id, task_datasets_ids = next(iter(task.items()))
-
-    task_id_str = task_id_tuple_to_str(task_id)
-
     table = create_waterbodies_observations_table(engine=engine)
 
     with Session.begin() as session:
-        task_exists = session.scalars(
+        results = session.scalars(
             select(table.c.task_id).where(table.c.task_id == task_id_str)
         ).first()
 
-    if task_exists:
+    if results:
         return True
     else:
         return False
