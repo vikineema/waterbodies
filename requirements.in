@@ -25,3 +25,6 @@ xarray
 gdal==3.6.3
 # Required by index_tiles.sh
 odc-apps-dc-tools
+# Testing
+pytest
+coverage
