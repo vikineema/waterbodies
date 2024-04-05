@@ -9,7 +9,7 @@ from odc.stats.model import DateTimeRange
 from waterbodies.hopper import create_tasks_from_scenes
 from waterbodies.io import check_directory_exists, find_geotiff_files
 from waterbodies.logs import logging_setup
-from waterbodies.text import parse_tile_id_from_filename
+from waterbodies.text import format_task, parse_tile_id_from_filename
 
 
 @click.command(name="generate-tasks", help="Generate tasks to run.", no_args_is_help=True)
@@ -48,8 +48,6 @@ def generate_tasks(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    temporal_range_ = DateTimeRange(temporal_range)
-
     if not check_directory_exists(path=historical_extent_rasters_directory):
         e = FileNotFoundError(f"Directory {historical_extent_rasters_directory} does not exist!")
         _log.error(e)
@@ -67,8 +65,11 @@ def generate_tasks(
 
     product = "wofs_ls"
 
+    temporal_range_ = DateTimeRange(temporal_range)
+
+    dc = Datacube(app=run_type)
+
     if run_type == "backlog-processing":
-        dc = Datacube(app="backlog-processing")
         dc_query = dict(product=product, time=(temporal_range_.start, temporal_range_.end))
         # Search the datacube for all wofs_ls datasets whose acquisition times fall within
         # the temporal range specified.
@@ -76,7 +77,6 @@ def generate_tasks(
         tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=tile_ids_of_interest)
 
     elif run_type == "gap-filling":
-        dc = Datacube(app="gap-filling")
         # The difference between gap-filling and the bcklog-processing is here
         # we are searching for datasets by their creation date (`creation_time`),
         # not their acquisition date (`time`).
@@ -99,4 +99,6 @@ def generate_tasks(
         # looping over each task to update the required task dataset ids here.
         tasks = [{task_id: []} for task_id in task_ids]
 
+    # Put the tasks in the correct format.
+    tasks = [format_task(task) for task in tasks]
     json.dump(tasks, sys.stdout)
