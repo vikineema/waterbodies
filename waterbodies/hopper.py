@@ -187,29 +187,33 @@ def create_tasks_from_scenes(
 
 
 def find_task_datasets_ids(
-    task_id: tuple[str, int, int],
+    solar_day: str,
+    tile_id_x: int,
+    tile_id_y: int,
     dc: Datacube,
     product: str,
 ) -> list[str]:
     """
-    Find all dataset ids given a task id.
+    Get the dataset ids for a task
 
     Parameters
     ----------
-    task_id : tuple[str, int, int]
-        Task id containing the solar day and tile x and y id
+    solar_day : str
+        Solar day part of the task id.
+    tile_id_x : int
+        X tile id part of the task id
+    tile_id_y : int
+        Y tile id part of the task id.
     dc : Datacube
         Datacube connection
     product : str
-        Search for datasets belonging to the product.
+        Product to query to get datasets.
 
     Returns
     -------
     list[str]
-        IDs for all the datasets that match the task id.
+        IDs of the datasets for the task
     """
-
-    solar_day, tile_id_x, tile_id_y = task_id
 
     tile_id = (tile_id_x, tile_id_y)
 
