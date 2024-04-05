@@ -208,10 +208,7 @@ def create_tasks_from_scenes(
     tasks = bin_by_solar_day(cells=cells)
 
     # Convert from dictionary to list of dictionaries.
-    tasks = [
-        create_task(task_id=task_id, task_datasets_ids=task_datasets_ids)
-        for task_id, task_datasets_ids in tasks.items()
-    ]
+    tasks = [{task_id: task_datasets_ids} for task_id, task_datasets_ids in tasks.items()]
 
     _log.info(f"Total number of tasks: {len(tasks)}")
 
