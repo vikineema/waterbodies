@@ -14,7 +14,7 @@ def runner():
     return CliRunner(echo_stdin=True)
 
 
-def test_generate_tasks_cli(runner, capsys: pytest.CaptureFixture):
+def test_generate_tasks_cli_backlog_processing(runner, capsys: pytest.CaptureFixture):
     expected_result = [
         {
             "solar_day": "2016-04-05",
