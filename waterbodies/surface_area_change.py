@@ -79,17 +79,19 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
         Masked WOfS Feature Layers .water DataArray
     """
     INVALID_PIXEL_VALUE = 2
-
     keep_attrs = wofl.attrs
 
-    clear_and_wet = wofl.water == 128
-    clear_and_dry = wofl.water == 0
+    # Use bitmasking values from DE Africa WOfS
+    clear_and_wet = wofl.water == 128 # 1 if clear and wet, 0 otherwise
+    clear_and_dry = wofl.water == 0 # 1 if clear and dry, 0 otherwise
 
-    clear = clear_and_wet | clear_and_dry
+    # create binary mask with 1 if clear wet or dry, 0 if not-clear
+    clear_wet_or_dry = clear_and_wet | clear_and_dry
 
-    # Set the invalid (not clear) pixels to 2
-    # Remaining values will be 1 if clear and wet, 0 if clear and dry
-    wofl_masked = clear_and_wet.where(clear, other=INVALID_PIXEL_VALUE)
+    # Start with clear and wet (1 if clear and wet, 0 otherwise)
+    # Set all not-clear pixels to 2
+    # Leaves clear and wet = 1, clear and dry = 0, all other values (invalid) = 2
+    wofl_masked = clear_and_wet.where(clear_wet_or_dry, other=INVALID_PIXEL_VALUE)
 
     wofl_masked.attrs = keep_attrs
 
@@ -106,6 +108,7 @@ def get_pixel_counts(region_mask, intensity_image):
     INVALID_PIXEL_VALUE = 2
 
     # Mask values can be any of 0, 1, or 2
+    # Return values present in mask and their correpsonding pixel counts
     mask_values, mask_value_counts = np.unique(masked_intensity_image, return_counts=True)
 
     # Convert into dictionary of {mask_value: count}
@@ -113,10 +116,10 @@ def get_pixel_counts(region_mask, intensity_image):
     mask_values_and_counts = dict(zip(mask_values, mask_value_counts))
 
     # Get the number of pixels for each type, setting to 0 if not present in mask_values_and_counts
-    px_total = sum(mask_value_counts)
     px_invalid = mask_values_and_counts.get(INVALID_PIXEL_VALUE, 0)
     px_dry = mask_values_and_counts.get(DRY_PIXEL_VALUE, 0)
     px_wet = mask_values_and_counts.get(WET_PIXEL_VALUE, 0)
+    px_total = px_invalid + px_dry + px_wet
 
     # Construct the counts as a dict for pandas dataframe
     pixel_counts = {
