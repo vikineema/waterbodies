@@ -1,9 +1,11 @@
 import os
 import re
+from pathlib import Path
 
 import fsspec
 import geopandas as gpd
 import s3fs
+from dotenv import load_dotenv
 from fsspec.implementations.local import LocalFileSystem
 from s3fs.core import S3FileSystem
 
@@ -90,3 +92,31 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
         geotiff_file_paths = [f"s3://{file}" for file in geotiff_file_paths]
 
     return geotiff_file_paths
+
+
+def is_sandbox_env() -> bool:
+    """
+    Check if running on the Analysis Sandbox
+
+    Returns
+    -------
+    bool
+        True if on Sandbox
+    """
+    return bool(os.environ.get("JUPYTERHUB_USER", None))
+
+
+def check_waterbodies_db_credentials():
+    return bool(os.environ.get("WATERBODIES_DB_USER", None))
+
+
+def setup_sandbox_env(env_path=os.path.join(str(Path.home()), ".env")) -> bool:
+    # If on sandbox
+    if is_sandbox_env():
+        # Check if credentials for the waterbodies database
+        # exist.
+        if not check_waterbodies_db_credentials():
+            load_dotenv(env_path)
+        # Verify.
+        if not check_waterbodies_db_credentials():
+            raise ValueError("Missing waterbodies database credentials")
