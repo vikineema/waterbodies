@@ -64,9 +64,9 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
     """
     Apply WOfS bitmasking to a WOfS Feature Layers dataset
     to obtain a masked DataArray with the values:
-        1 = water
-        0 = dry
-        np.nan = invalid (not wet or dry)
+        1 = clear and wet
+        0 = clear and dry
+        2 = invalid (neither clear and wet or clear and dry)
 
     Parameters
     ----------wofl
@@ -78,6 +78,8 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
     xr.DataArray
         Masked WOfS Feature Layers .water DataArray
     """
+    INVALID_PIXEL_VALUE = 2
+
     keep_attrs = wofl.attrs
 
     clear_and_wet = wofl.water == 128
@@ -85,9 +87,9 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
 
     clear = clear_and_wet | clear_and_dry
 
-    # Set the invalid (not clear) pixels to np.nan
-    # Remaining values will be 1 if water, 0 if dry
-    wofl_masked = clear_and_wet.where(clear)
+    # Set the invalid (not clear) pixels to 2
+    # Remaining values will be 1 if clear and wet, 0 if clear and dry
+    wofl_masked = clear_and_wet.where(clear, other=INVALID_PIXEL_VALUE)
 
     wofl_masked.attrs = keep_attrs
 
@@ -98,19 +100,25 @@ def get_pixel_counts(region_mask, intensity_image):
 
     masked_intensity_image = intensity_image[region_mask]
 
-    dry_pixel_value = 0
-    wet_pixel_value = 1
-    invalid_pixel_value = -9999
+    # Hard coded mask values from mask_wofl function
+    DRY_PIXEL_VALUE = 0
+    WET_PIXEL_VALUE = 1
+    INVALID_PIXEL_VALUE = 2
 
-    unique_values, unique_value_counts = np.unique(masked_intensity_image, return_counts=True)
-    unique_values = np.where(np.isnan(unique_values), invalid_pixel_value, unique_values)
-    unique_values_and_counts = dict(zip(unique_values, unique_value_counts))
+    # Mask values can be any of 0, 1, or 2
+    mask_values, mask_value_counts = np.unique(masked_intensity_image, return_counts=True)
 
-    px_total = np.sum(unique_value_counts)
-    px_invalid = unique_values_and_counts.get(invalid_pixel_value, np.nan)
-    px_dry = unique_values_and_counts.get(dry_pixel_value, np.nan)
-    px_wet = unique_values_and_counts.get(wet_pixel_value, np.nan)
+    # Convert into dictionary of {mask_value: count}
+    # E.g. {0: 100, 1: 50, 2:40}
+    mask_values_and_counts = dict(zip(mask_values, mask_value_counts))
 
+    # Get the number of pixels for each type, setting to 0 if not present in mask_values_and_counts
+    px_total = sum(mask_value_counts)
+    px_invalid = mask_values_and_counts.get(INVALID_PIXEL_VALUE, 0)
+    px_dry = mask_values_and_counts.get(DRY_PIXEL_VALUE, 0)
+    px_wet = mask_values_and_counts.get(WET_PIXEL_VALUE, 0)
+
+    # Construct the counts as a dict for pandas dataframe
     pixel_counts = {
         "px_total": [px_total],
         "px_invalid": [px_invalid],
