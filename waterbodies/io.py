@@ -3,6 +3,7 @@ import os
 import re
 from pathlib import Path
 
+import boto3
 import fsspec
 import geopandas as gpd
 import s3fs
@@ -21,11 +22,17 @@ def get_filesystem(
     path: str,
 ) -> S3FileSystem | LocalFileSystem:
     if is_s3_path(path=path):
-        # TODO Need to test which works for the entire repository
-        # anon=True use anonymous connection (public buckets only).
-        # anon=False uses the key/secret given, or boto’s credential resolver
-        # (client_kwargs, environment, variables, config files, EC2 IAM server, in that order)
-        fs = s3fs.S3FileSystem(anon=False)
+        # If no credentials or invalid credentials provided
+        # switch to anonymous user.
+        try:
+            client = boto3.client("s3")
+            response = client.list_buckets()  # noqa F841
+        except Exception as e:  # noqa F841
+            # _log.error(e)
+            _log.info("None of the credentials methods are available, using anonymous access")
+            fs = s3fs.S3FileSystem(anon=True)
+        else:
+            fs = s3fs.S3FileSystem(anon=False)
     else:
         fs = fsspec.filesystem("file")
     return fs
