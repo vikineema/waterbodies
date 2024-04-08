@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from pathlib import Path
@@ -8,6 +9,8 @@ import s3fs
 from dotenv import load_dotenv
 from fsspec.implementations.local import LocalFileSystem
 from s3fs.core import S3FileSystem
+
+_log = logging.getLogger(__name__)
 
 
 def is_s3_path(path: str) -> bool:
@@ -106,17 +109,33 @@ def is_sandbox_env() -> bool:
     return bool(os.environ.get("JUPYTERHUB_USER", None))
 
 
-def check_waterbodies_db_credentials():
+def check_waterbodies_db_credentials_exist():
     return bool(os.environ.get("WATERBODIES_DB_USER", None))
 
 
-def setup_sandbox_env(env_path=os.path.join(str(Path.home()), ".env")) -> bool:
-    # If on sandbox
+def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env")):
+    """
+    Load the .env file to set up the waterbodies database
+    credentials on the Analysis Sandbox.
+
+    Parameters
+    ----------
+    dotenv_path : str, optional
+        Absolute or relative path to .env file, by default os.path.join(str(Path.home()), ".env")
+    """
     if is_sandbox_env():
-        # Check if credentials for the waterbodies database
-        # exist.
-        if not check_waterbodies_db_credentials():
-            load_dotenv(env_path)
-        # Verify.
-        if not check_waterbodies_db_credentials():
-            raise ValueError("Missing waterbodies database credentials")
+        if not check_waterbodies_db_credentials_exist():
+            check_dotenv = load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
+            if not check_dotenv:
+                # Check if the file does not exist
+                if not check_file_exists(dotenv_path):
+                    e = FileNotFoundError(f"{dotenv_path} does NOT exist!")
+                    _log.exception(e)
+                    raise e
+                else:
+                    e = ValueError(f"No variables found in {dotenv_path}")
+                    _log.exception(e)
+                    raise e
+            else:
+                if not check_waterbodies_db_credentials_exist():
+                    raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
