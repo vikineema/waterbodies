@@ -6,6 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.schema import Table
 
 from waterbodies.db_models import WaterbodyBase
+from waterbodies.io import is_sandbox_env, setup_sandbox_env
 
 _log = logging.getLogger(__name__)
 
@@ -22,6 +23,8 @@ def get_waterbodies_engine() -> Engine:
     Engine
         Engine to connect to the PROD waterbodies database.
     """
+    if is_sandbox_env():
+        setup_sandbox_env()
 
     dialect = "postgresql"
     driver = "psycopg2"

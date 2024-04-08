@@ -123,19 +123,19 @@ def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env"))
     dotenv_path : str, optional
         Absolute or relative path to .env file, by default os.path.join(str(Path.home()), ".env")
     """
-    if is_sandbox_env():
-        if not check_waterbodies_db_credentials_exist():
-            check_dotenv = load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
-            if not check_dotenv:
-                # Check if the file does not exist
-                if not check_file_exists(dotenv_path):
-                    e = FileNotFoundError(f"{dotenv_path} does NOT exist!")
-                    _log.exception(e)
-                    raise e
-                else:
-                    e = ValueError(f"No variables found in {dotenv_path}")
-                    _log.exception(e)
-                    raise e
+
+    if not check_waterbodies_db_credentials_exist():
+        check_dotenv = load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
+        if not check_dotenv:
+            # Check if the file does not exist
+            if not check_file_exists(dotenv_path):
+                e = FileNotFoundError(f"{dotenv_path} does NOT exist!")
+                _log.exception(e)
+                raise e
             else:
-                if not check_waterbodies_db_credentials_exist():
-                    raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
+                e = ValueError(f"No variables found in {dotenv_path}")
+                _log.exception(e)
+                raise e
+        else:
+            if not check_waterbodies_db_credentials_exist():
+                raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
