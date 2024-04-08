@@ -116,7 +116,7 @@ def is_sandbox_env() -> bool:
     return bool(os.environ.get("JUPYTERHUB_USER", None))
 
 
-def check_waterbodies_db_credentials_exist():
+def check_waterbodies_db_credentials_exist() -> bool:
     return bool(os.environ.get("WATERBODIES_DB_USER", None))
 
 
