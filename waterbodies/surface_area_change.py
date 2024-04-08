@@ -82,8 +82,8 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
     keep_attrs = wofl.attrs
 
     # Use bitmasking values from DE Africa WOfS
-    clear_and_wet = wofl.water == 128 # 1 if clear and wet, 0 otherwise
-    clear_and_dry = wofl.water == 0 # 1 if clear and dry, 0 otherwise
+    clear_and_wet = wofl.water == 128  # 1 if clear and wet, 0 otherwise
+    clear_and_dry = wofl.water == 0  # 1 if clear and dry, 0 otherwise
 
     # create binary mask with 1 if clear wet or dry, 0 if not-clear
     clear_wet_or_dry = clear_and_wet | clear_and_dry
