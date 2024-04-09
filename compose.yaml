@@ -26,6 +26,7 @@ services:
       - AWS_ACCESS_KEY_ID=fake_id
       - AWS_SECRET_ACCESS_KEY=fake_key
       - AWS_NO_SIGN_REQUEST=YES
+      - SPATIALITE_LIBRARY_PATH=mod_spatialite.so
     volumes:
       - .:/code
     depends_on:
