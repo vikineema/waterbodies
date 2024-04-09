@@ -15,9 +15,6 @@ from waterbodies.io import check_file_exists
 _log = logging.getLogger(__name__)
 
 
-METADATA_OBJ = WaterbodyBase.metadata
-
-
 def is_sandbox_env() -> bool:
     """
     Check if running on the Analysis Sandbox
@@ -64,13 +61,12 @@ def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env"))
 
 def get_test_waterbodies_engine() -> Engine:
     """Get a SQLite in-memory database engine."""
-    dialect = "sqlite"
-    driver = "pysqlite"
 
-    database_url = f"{dialect}+{driver}://"
-    engine = create_engine(database_url, future=True)
-
+    engine = create_engine("sqlite+pysqlite:///:memory:", echo=False, future=True)
     listen(engine, "connect", load_spatialite)
+    # Create the required waterbodies tables in the engine
+    metadata_obj = WaterbodyBase.metadata
+    metadata_obj.create_all(bind=engine, checkfirst=True)
     return engine
 
 
@@ -178,7 +174,8 @@ def create_table(engine: Engine, db_model) -> Table:
     Table
         Table object with schema matching the mapped class.
     """
-    METADATA_OBJ.create_all(bind=engine, tables=[db_model.__table__], checkfirst=True)
+    metadata_obj = WaterbodyBase.metadata
+    metadata_obj.create_all(bind=engine, tables=[db_model.__table__], checkfirst=True)
     table = get_existing_table(engine=engine, table_name=db_model.__table__.name)
     return table
 
@@ -194,4 +191,5 @@ def delete_table(engine: Engine, table_name: str):
         Name of the table to delete.
     """
     table = get_existing_table(engine=engine, table_name=table_name)
-    METADATA_OBJ.drop_all(bind=engine, tables=[table], checkfirst=True)
+    metadata_obj = WaterbodyBase.metadata
+    metadata_obj.drop_all(bind=engine, tables=[table], checkfirst=True)
