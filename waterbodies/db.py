@@ -1,12 +1,16 @@
 import logging
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
+from geoalchemy2 import load_spatialite
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.engine.base import Engine
+from sqlalchemy.event import listen
 from sqlalchemy.schema import Table
 
 from waterbodies.db_models import WaterbodyBase
-from waterbodies.io import is_sandbox_env, setup_sandbox_env
+from waterbodies.io import check_file_exists
 
 _log = logging.getLogger(__name__)
 
@@ -14,14 +18,70 @@ _log = logging.getLogger(__name__)
 METADATA_OBJ = WaterbodyBase.metadata
 
 
-def get_waterbodies_engine() -> Engine:
+def is_sandbox_env() -> bool:
     """
-    Create engine to connect to the PROD waterbodies database.
+    Check if running on the Analysis Sandbox
+
+    Returns
+    -------
+    bool
+        True if on Sandbox
+    """
+    return bool(os.environ.get("JUPYTERHUB_USER", None))
+
+
+def check_waterbodies_db_credentials_exist() -> bool:
+    return bool(os.environ.get("WATERBODIES_DB_USER", None))
+
+
+def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env")):
+    """
+    Load the .env file to set up the waterbodies database
+    credentials on the Analysis Sandbox.
+
+    Parameters
+    ----------
+    dotenv_path : str, optional
+        Absolute or relative path to .env file, by default os.path.join(str(Path.home()), ".env")
+    """
+
+    if not check_waterbodies_db_credentials_exist():
+        check_dotenv = load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
+        if not check_dotenv:
+            # Check if the file does not exist
+            if not check_file_exists(dotenv_path):
+                e = FileNotFoundError(f"{dotenv_path} does NOT exist!")
+                _log.exception(e)
+                raise e
+            else:
+                e = ValueError(f"No variables found in {dotenv_path}")
+                _log.exception(e)
+                raise e
+        else:
+            if not check_waterbodies_db_credentials_exist():
+                raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
+
+
+def get_test_waterbodies_engine() -> Engine:
+    """Get a SQLite in-memory database engine."""
+    dialect = "sqlite"
+    driver = "pysqlite"
+
+    database_url = f"{dialect}+{driver}://"
+    engine = create_engine(database_url, future=True)
+
+    listen(engine, "connect", load_spatialite)
+    return engine
+
+
+def get_main_waterbodies_engine() -> Engine:
+    """
+    Create engine to connect to the DEV/PROD waterbodies database.
 
     Returns
     -------
     Engine
-        Engine to connect to the PROD waterbodies database.
+        Engine to connect to the DEV/PROD waterbodies database.
     """
     if is_sandbox_env():
         setup_sandbox_env()
@@ -37,6 +97,26 @@ def get_waterbodies_engine() -> Engine:
 
     database_url = f"{dialect}+{driver}://{username}:{password}@{host}:{port}/{database_name}"
     return create_engine(database_url, future=True)
+
+
+def check_testing_mode() -> bool:
+    return bool(os.environ.get("TestingMode", None))
+
+
+def get_waterbodies_engine() -> Engine:
+    """
+    Get the waterbodies engine to connect to.
+
+    Returns
+    -------
+    Engine
+        Waterbodies engine
+    """
+    if check_testing_mode():
+        engine = get_test_waterbodies_engine()
+    else:
+        engine = get_main_waterbodies_engine()
+    return engine
 
 
 def get_existing_table_names(engine: Engine) -> list[str]:

@@ -1,13 +1,11 @@
 import logging
 import os
 import re
-from pathlib import Path
 
 import boto3
 import fsspec
 import geopandas as gpd
 import s3fs
-from dotenv import load_dotenv
 from fsspec.implementations.local import LocalFileSystem
 from s3fs.core import S3FileSystem
 
@@ -102,47 +100,3 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
         geotiff_file_paths = [f"s3://{file}" for file in geotiff_file_paths]
 
     return geotiff_file_paths
-
-
-def is_sandbox_env() -> bool:
-    """
-    Check if running on the Analysis Sandbox
-
-    Returns
-    -------
-    bool
-        True if on Sandbox
-    """
-    return bool(os.environ.get("JUPYTERHUB_USER", None))
-
-
-def check_waterbodies_db_credentials_exist() -> bool:
-    return bool(os.environ.get("WATERBODIES_DB_USER", None))
-
-
-def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env")):
-    """
-    Load the .env file to set up the waterbodies database
-    credentials on the Analysis Sandbox.
-
-    Parameters
-    ----------
-    dotenv_path : str, optional
-        Absolute or relative path to .env file, by default os.path.join(str(Path.home()), ".env")
-    """
-
-    if not check_waterbodies_db_credentials_exist():
-        check_dotenv = load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
-        if not check_dotenv:
-            # Check if the file does not exist
-            if not check_file_exists(dotenv_path):
-                e = FileNotFoundError(f"{dotenv_path} does NOT exist!")
-                _log.exception(e)
-                raise e
-            else:
-                e = ValueError(f"No variables found in {dotenv_path}")
-                _log.exception(e)
-                raise e
-        else:
-            if not check_waterbodies_db_credentials_exist():
-                raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
