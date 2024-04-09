@@ -64,15 +64,6 @@ def process_task(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    if isinstance(tile_id_x, str):
-        tile_id_x = int(tile_id_x)
-
-    if isinstance(tile_id_y, str):
-        tile_id_x = int(tile_id_y)
-
-    if isinstance(task_datasets_ids, str):
-        task_datasets_ids = ast.literal_eval(task_datasets_ids)
-
     if not check_directory_exists(path=historical_extent_rasters_directory):
         e = FileNotFoundError(f"Directory {historical_extent_rasters_directory} does not exist!")
         _log.error(e)
