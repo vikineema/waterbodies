@@ -1,0 +1,28 @@
+name: Create a new tag
+on:
+  pull_request:
+    types: 
+        - closed
+    branches:
+        - main
+   
+jobs:
+  bump_version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+            ref: ${{ github.event.pull_request.merge_commit_sha }}
+            fetch-depth: '0'
+
+      - name: Patch Package Versions when code change.
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          WITH_V: true
+
+
+        
