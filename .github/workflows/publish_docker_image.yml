@@ -6,8 +6,6 @@ on:
       - "Create a new tag"
     types: 
       - completed
-    branches:
-      - main
   workflow_dispatch:
 
 
