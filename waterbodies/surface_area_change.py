@@ -139,7 +139,7 @@ def get_waterbody_observations(
     task_datasets_ids: list[str],
     historical_extent_rasters_directory: str,
     dc: Datacube,
-) -> pd.DataFrame:
+) -> pd.DataFrame | None:
     """
     Generate the waterbody observations for a given task
 
@@ -208,40 +208,43 @@ def get_waterbody_observations(
         poly_pixel_counts_df["uid"] = [wbid_to_uid[str(region_prop.label)]]
         polygons_pixel_counts.append(poly_pixel_counts_df)
 
-    waterbody_observations = pd.concat(polygons_pixel_counts, ignore_index=True)
+    if polygons_pixel_counts:
+        waterbody_observations = pd.concat(polygons_pixel_counts, ignore_index=True)
 
-    px_area = abs(
-        historical_extent_raster.geobox.resolution[0]
-        * historical_extent_raster.geobox.resolution[1]
-    )
+        px_area = abs(
+            historical_extent_raster.geobox.resolution[0]
+            * historical_extent_raster.geobox.resolution[1]
+        )
 
-    waterbody_observations["area_invalid_m2"] = waterbody_observations["px_invalid"] * px_area
-    waterbody_observations["area_dry_m2"] = waterbody_observations["px_dry"] * px_area
-    waterbody_observations["area_wet_m2"] = waterbody_observations["px_wet"] * px_area
+        waterbody_observations["area_invalid_m2"] = waterbody_observations["px_invalid"] * px_area
+        waterbody_observations["area_dry_m2"] = waterbody_observations["px_dry"] * px_area
+        waterbody_observations["area_wet_m2"] = waterbody_observations["px_wet"] * px_area
 
-    waterbody_observations["date"] = pd.to_datetime(solar_day)
-    waterbody_observations["obs_id"] = waterbody_observations["uid"].apply(
-        lambda x: f"{task_id_str}_{x}"
-    )
-    waterbody_observations["task_id"] = task_id_str
+        waterbody_observations["date"] = pd.to_datetime(solar_day)
+        waterbody_observations["obs_id"] = waterbody_observations["uid"].apply(
+            lambda x: f"{task_id_str}_{x}"
+        )
+        waterbody_observations["task_id"] = task_id_str
 
-    # Reorder how the columns appear
-    waterbody_observations = waterbody_observations[
-        [
-            "obs_id",
-            "task_id",
-            "uid",
-            "date",
-            "px_total",
-            "px_wet",
-            "area_wet_m2",
-            "px_dry",
-            "area_dry_m2",
-            "px_invalid",
-            "area_invalid_m2",
+        # Reorder how the columns appear
+        waterbody_observations = waterbody_observations[
+            [
+                "obs_id",
+                "task_id",
+                "uid",
+                "date",
+                "px_total",
+                "px_wet",
+                "area_wet_m2",
+                "px_dry",
+                "area_dry_m2",
+                "px_invalid",
+                "area_invalid_m2",
+            ]
         ]
-    ]
-    return waterbody_observations
+        return waterbody_observations
+    else:
+        return None
 
 
 def add_waterbody_observations_to_db(
