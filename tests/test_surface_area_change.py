@@ -41,9 +41,7 @@ def test_generate_tasks_cli_backlog_processing(
     expected_result = [reference_task]
     run_type = "backlog-processing"
     temporal_range = "2016-04-05--P1D"
-    historical_extent_rasters_directory = (
-        "tests/data/historical_extent_rasters_directory"
-    )
+    historical_extent_rasters_directory = "tests/data/historical_extent_rasters_directory"
     args = [
         "--verbose",
         f"--temporal-range={temporal_range}",
