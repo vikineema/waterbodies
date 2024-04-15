@@ -36,7 +36,7 @@ from waterbodies.text import get_task_id_str_from_tuple
 @click.option("--solar-day", type=str, help="Solar day of the task")
 @click.option("--tile-id-x", type=int, help="X tile id of the task")
 @click.option("--tile-id-y", type=int, help="Y tile id of the task")
-@click.option("--task-datasets-ids", type=list, help="IDs of the datasets for the task")
+@click.option("--task-datasets-ids", type=str, help="IDs of the datasets for the task")
 @click.option(
     "--historical-extent-rasters-directory",
     type=str,
