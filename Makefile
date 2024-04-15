@@ -18,12 +18,8 @@ build: ## 0. Build the base image
 up: ## 1. Bring up your Docker environment.
 	docker compose up -d 
 
-init: ## 2. Prepare the database, initialise the database schema.  # --no-default-types --no-init-users
+init: ## 2. Prepare the database, initialise the database schema.
 	docker compose exec -T index datacube -v system init
-
-metadata: ## 3. Add metadata types.
-	docker compose exec -T index datacube -v metadata add https://raw.githubusercontent.com/digitalearthafrica/config/master/metadata/eo3_deafrica.odc-type.yaml
-	docker compose exec -T index datacube -v metadata add https://raw.githubusercontent.com/digitalearthafrica/config/master/metadata/eo3_landsat_ard.odc-type.yaml
 
 products: ## 3. Add the wofs_ls product definition for testing.
 	docker compose exec -T index datacube -v product add https://raw.githubusercontent.com/digitalearthafrica/config/master/products/wofs_ls.odc-product.yaml
