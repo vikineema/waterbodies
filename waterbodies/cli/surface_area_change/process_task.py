@@ -116,7 +116,10 @@ def process_task(
             historical_extent_rasters_directory=historical_extent_rasters_directory,
             dc=dc,
         )
-        add_waterbody_observations_to_db(
-            waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-        )
-        _log.info(f"Task {task_id_str} complete")
+        if waterbody_observations is None:
+            _log.info(f"Task {task_id_str} has no waterbody observations")
+        else:
+            add_waterbody_observations_to_db(
+                waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+            )
+            _log.info(f"Task {task_id_str} complete")
