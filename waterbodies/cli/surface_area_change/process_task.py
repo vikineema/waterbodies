@@ -77,10 +77,10 @@ def process_task(
     task_id_tuple = (solar_day, tile_id_x, tile_id_y)
     task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
-    # Get task datasets ids as list.
-    task_datasets_ids = task_datasets_ids.lstrip("[").rstrip("]").split(",")
-
     if run_type == "backlog-processing":
+        # Get task datasets ids as list.
+        task_datasets_ids = task_datasets_ids.lstrip("[").rstrip("]").split(",")
+
         if not overwrite:
             exists = check_task_exists(task_id_str=task_id_str, engine=engine)
 
