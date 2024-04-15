@@ -20,17 +20,9 @@ def get_filesystem(
     path: str,
 ) -> S3FileSystem | LocalFileSystem:
     if is_s3_path(path=path):
-        # If no credentials or invalid credentials provided
-        # switch to anonymous user.
-        try:
-            client = boto3.client("s3")
-            response = client.list_buckets()  # noqa F841
-        except Exception as e:  # noqa F841
-            # _log.error(e)
-            _log.info("None of the credentials methods are available, using anonymous access")
-            fs = s3fs.S3FileSystem(anon=True)
-        else:
-            fs = s3fs.S3FileSystem(anon=False)
+        fs = s3fs.S3FileSystem(
+            anon=False, s3_additional_kwargs={"ACL": "bucket-owner-full-control"}
+        )
     else:
         fs = fsspec.filesystem("file")
     return fs
