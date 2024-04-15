@@ -23,7 +23,7 @@ class WaterbodyHistoricalExtent(WaterbodyBase):
 
 
 class WaterbodyObservation(WaterbodyBase):
-    __tablename__ = "waterbody_observations"
+    __tablename__ = "waterbodies_observations_test"
 
     obs_id: Mapped[str] = Column(String, primary_key=True)
     uid: Mapped[str] = Column(String, ForeignKey("waterbodies_historical_extent.uid"), index=True)
