@@ -78,6 +78,8 @@ def process_task(
     task_id_tuple = (solar_day, tile_id_x, tile_id_y)
     task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
+    # Parse tile ids.
+    task_datasets_ids = ast.literal_eval(task_datasets_ids)
     _log.info(task_datasets_ids)
     _log.info(type(task_datasets_ids))
     if run_type == "backlog-processing":
