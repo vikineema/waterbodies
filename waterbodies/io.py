@@ -2,7 +2,6 @@ import logging
 import os
 import re
 
-import boto3
 import fsspec
 import geopandas as gpd
 import s3fs
