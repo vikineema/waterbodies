@@ -77,12 +77,10 @@ def process_task(
     task_id_tuple = (solar_day, tile_id_x, tile_id_y)
     task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
-    # Get task datasets ids as list.
-    task_datasets_ids = task_datasets_ids.lstrip("[").rstrip("]").split(",")
-    _log.info(task_datasets_ids)
-    _log.info(type(task_datasets_ids))
-
     if run_type == "backlog-processing":
+        # Get task datasets ids as list.
+        task_datasets_ids = task_datasets_ids.lstrip("[").rstrip("]").split(",")
+
         if not overwrite:
             exists = check_task_exists(task_id_str=task_id_str, engine=engine)
 
@@ -95,10 +93,13 @@ def process_task(
                 historical_extent_rasters_directory=historical_extent_rasters_directory,
                 dc=dc,
             )
-            add_waterbody_observations_to_db(
-                waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-            )
-            _log.info(f"Task {task_id_str} complete")
+            if waterbody_observations is None:
+                _log.info(f"Task {task_id_str} has no waterbody observations")
+            else:
+                add_waterbody_observations_to_db(
+                    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+                )
+                _log.info(f"Task {task_id_str} complete")
         else:
             _log.info(f"Task {task_id_str} already exists, skipping")
 
@@ -115,7 +116,10 @@ def process_task(
             historical_extent_rasters_directory=historical_extent_rasters_directory,
             dc=dc,
         )
-        add_waterbody_observations_to_db(
-            waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-        )
-        _log.info(f"Task {task_id_str} complete")
+        if waterbody_observations is None:
+            _log.info(f"Task {task_id_str} has no waterbody observations")
+        else:
+            add_waterbody_observations_to_db(
+                waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+            )
+            _log.info(f"Task {task_id_str} complete")
