@@ -1,10 +1,15 @@
 name: Publish Docker Image
 
 on:
-  workflow_dispatch:
-  push:
+  workflow_run:
+    workflows:
+      - "Create a new tag"
+    types: 
+      - completed
     branches:
       - main
+  workflow_dispatch:
+
 
 env:
   IMAGE_NAME: digitalearthafrica/waterbodies
@@ -35,7 +40,7 @@ jobs:
         run: |
           git fetch --all --tags
           pip install setuptools-scm
-          echo "VERSION=$(python -m setuptools_scm)" >> $GITHUB_ENV
+          echo "VERSION=$(python -m setuptools_scm  | sed s/+/./g)" >> $GITHUB_ENV
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
