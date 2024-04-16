@@ -1,13 +1,13 @@
 import json
 import logging
-import sys
+import os
 
 import click
 from datacube import Datacube
 from odc.stats.model import DateTimeRange
 
 from waterbodies.hopper import create_tasks_from_scenes
-from waterbodies.io import check_directory_exists, find_geotiff_files
+from waterbodies.io import check_directory_exists, find_geotiff_files, get_filesystem
 from waterbodies.logs import logging_setup
 from waterbodies.text import format_task, get_tile_id_tuple_from_filename
 
@@ -39,11 +39,17 @@ from waterbodies.text import format_task, get_tile_id_tuple_from_filename
     type=str,
     help="Path to the directory containing the historical extent raster files.",
 )
+@click.option(
+    "--tasks-directory",
+    type=str,
+    help="Directory to write the tasks file and tasks counts file to",
+)
 def generate_tasks(
     verbose,
     temporal_range,
     run_type,
     historical_extent_rasters_directory,
+    tasks_directory,
 ):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
@@ -97,4 +103,23 @@ def generate_tasks(
 
     # Put the tasks in the correct format.
     tasks = [format_task(task) for task in tasks]
-    json.dump(tasks, sys.stdout)
+
+    # Convert list to json array.
+    tasks_json_array = json.dumps(tasks)
+
+    fs = get_filesystem(path=tasks_directory)
+
+    if not check_directory_exists(path=tasks_directory):
+        fs.mkdirs(path=tasks_directory, exist_ok=True)
+        _log.info(f"Created directory {tasks_directory}")
+
+    tasks_output_file = os.path.join(tasks_directory, f"{run_type}_{temporal_range}_tasks")
+    tasks_count_file = os.path.join(tasks_directory, f"{run_type}_{temporal_range}_tasks_count")
+
+    with fs.open(tasks_output_file, "w") as file:
+        file.write(tasks_json_array)
+    _log.info(f"Tasks written to {tasks_output_file}")
+
+    with fs.open(tasks_count_file, "w") as file:
+        file.write(str(len(tasks)))
+    _log.info(f"Tasks count written to {tasks_count_file}")
