@@ -1,3 +1,4 @@
+import json
 import logging
 
 import click
@@ -32,10 +33,7 @@ from waterbodies.text import get_task_id_str_from_tuple
         case_sensitive=True,
     ),
 )
-@click.option("--solar-day", type=str, help="Solar day of the task")
-@click.option("--tile-id-x", type=int, help="X tile id of the task")
-@click.option("--tile-id-y", type=int, help="Y tile id of the task")
-@click.option("--task-datasets-ids", type=str, help="IDs of the datasets for the task")
+@click.option("--task", type=str, help="Task to process")
 @click.option(
     "--historical-extent-rasters-directory",
     type=str,
@@ -52,10 +50,7 @@ from waterbodies.text import get_task_id_str_from_tuple
 def process_task(
     verbose,
     run_type,
-    solar_day,
-    tile_id_x,
-    tile_id_y,
-    task_datasets_ids,
+    task,
     historical_extent_rasters_directory,
     overwrite,
 ):
@@ -74,12 +69,18 @@ def process_task(
 
     engine = get_waterbodies_engine()
 
+    _log.info(f"Processing task: {task}")
+    task = json.loads(task)
+
+    solar_day = task["solar_day"]
+    tile_id_x = task["tile_id_x"]
+    tile_id_y = task["tile_id_y"]
+    task_datasets_ids = task["task_datasets_ids"]
+
     task_id_tuple = (solar_day, tile_id_x, tile_id_y)
     task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
     if run_type == "backlog-processing":
-        # Get task datasets ids as list.
-        task_datasets_ids = task_datasets_ids.lstrip("[").rstrip("]").split(",")
 
         if not overwrite:
             exists = check_task_exists(task_id_str=task_id_str, engine=engine)
