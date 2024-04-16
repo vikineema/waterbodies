@@ -13,6 +13,7 @@ RUN apt clean && apt update \
     tmux \ 
     unzip \
     vim  \
+    jq \
   # Install pip3.
   && apt install -y --fix-missing --no-install-recommends \
     python3-pip \
