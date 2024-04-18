@@ -8,7 +8,7 @@ from waterbodies.db import get_waterbodies_engine
 from waterbodies.hopper import find_task_datasets_ids
 from waterbodies.io import check_directory_exists
 from waterbodies.logs import logging_setup
-from waterbodies.surface_area_change import (
+from waterbodies.surface_area_change import (  # noqa F401
     add_waterbody_observations_to_db,
     check_task_exists,
     get_waterbody_observations,
@@ -97,9 +97,13 @@ def process_task(
             if waterbody_observations is None:
                 _log.info(f"Task {task_id_str} has no waterbody observations")
             else:
-                add_waterbody_observations_to_db(
-                    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+                # add_waterbody_observations_to_db(
+                #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+                # )
+                _log.info(
+                    f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
                 )
+
                 _log.info(f"Task {task_id_str} complete")
         else:
             _log.info(f"Task {task_id_str} already exists, skipping")
@@ -120,7 +124,11 @@ def process_task(
         if waterbody_observations is None:
             _log.info(f"Task {task_id_str} has no waterbody observations")
         else:
-            add_waterbody_observations_to_db(
-                waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+            # add_waterbody_observations_to_db(
+            #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+            # )
+            _log.info(
+                f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
             )
+
             _log.info(f"Task {task_id_str} complete")
