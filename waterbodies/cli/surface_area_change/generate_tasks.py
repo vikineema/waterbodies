@@ -124,8 +124,8 @@ def generate_tasks(
         fs.mkdirs(path=tasks_directory, exist_ok=True)
         _log.info(f"Created directory {tasks_directory}")
 
-    tasks_output_file = os.path.join(tasks_directory, f"{run_type}_{temporal_range}_tasks")
-    tasks_count_file = os.path.join(tasks_directory, f"{run_type}_{temporal_range}_tasks_count")
+    tasks_output_file = os.path.join(tasks_directory, "tasks")
+    tasks_count_file = os.path.join(tasks_directory, "tasks_count")
 
     with fs.open(tasks_output_file, "w") as file:
         file.write(task_chunks_json_array)
