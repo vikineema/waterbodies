@@ -41,11 +41,6 @@ from waterbodies.text import format_task, get_tile_id_tuple_from_filename
     help="Path to the directory containing the historical extent raster files.",
 )
 @click.option(
-    "--tasks-directory",
-    type=str,
-    help="Directory to write the tasks file and tasks counts file to",
-)
-@click.option(
     "--max-parallel-steps",
     default=7000,
     type=int,
@@ -56,7 +51,6 @@ def generate_tasks(
     temporal_range,
     run_type,
     historical_extent_rasters_directory,
-    tasks_directory,
     max_parallel_steps,
 ):
     logging_setup(verbose)
@@ -118,6 +112,7 @@ def generate_tasks(
     # Convert list to json array.
     task_chunks_json_array = json.dumps(task_chunks)
 
+    tasks_directory = "/tmp/"
     fs = get_filesystem(path=tasks_directory)
 
     if not check_directory_exists(path=tasks_directory):
