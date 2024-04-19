@@ -54,7 +54,6 @@ def process_tasks(
     task_list,
     historical_extent_rasters_directory,
     overwrite,
-    tasks_directory,
 ):
 
     logging_setup(verbose)
