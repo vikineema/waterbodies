@@ -141,7 +141,7 @@ def create_tasks_from_datasets(
     ----------
     datasets : list[Dataset]
         A list of datasets to create tasks for.
-    tiles_containing_waterbodies : list[tuple[int]] | None, optional
+    tile_ids_of_interest : list[tuple[int]] | None, optional
         List of tile IDs (x, y) for which tasks should be created. Each tuple
         represents the tile index in the format (tile_id_x, tile_id_y).
         If provided, only datasets matching the specified tile IDs will be considered
