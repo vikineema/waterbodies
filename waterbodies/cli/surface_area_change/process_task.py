@@ -1,12 +1,13 @@
 import json
 import logging
+import os
 
 import click
 from datacube import Datacube
 
 from waterbodies.db import get_waterbodies_engine
 from waterbodies.hopper import find_task_datasets_ids
-from waterbodies.io import check_directory_exists
+from waterbodies.io import check_directory_exists, get_filesystem
 from waterbodies.logs import logging_setup
 from waterbodies.surface_area_change import (  # noqa F401
     add_waterbody_observations_to_db,
@@ -17,8 +18,8 @@ from waterbodies.text import get_task_id_str_from_tuple
 
 
 @click.command(
-    name="process-task",
-    help="Process a single task to generate waterbody observations.",
+    name="process-tasks",
+    help="Process a list of tasks to generate waterbody observations.",
     no_args_is_help=True,
 )
 @click.option("-v", "--verbose", default=1, count=True)
@@ -33,7 +34,7 @@ from waterbodies.text import get_task_id_str_from_tuple
         case_sensitive=True,
     ),
 )
-@click.option("--task", type=str, help="Task to process")
+@click.option("--task-list", type=str, help="List of tasks to process")
 @click.option(
     "--historical-extent-rasters-directory",
     type=str,
@@ -47,12 +48,13 @@ from waterbodies.text import get_task_id_str_from_tuple
         "Overwrite is ignored if run type is gap-filling."
     ),
 )
-def process_task(
+def process_tasks(
     verbose,
     run_type,
-    task,
+    task_list,
     historical_extent_rasters_directory,
     overwrite,
+    tasks_directory,
 ):
 
     logging_setup(verbose)
@@ -69,66 +71,95 @@ def process_task(
 
     engine = get_waterbodies_engine()
 
-    _log.info(f"Processing task: {task}")
-    task = json.loads(task)
+    tasks = json.loads(task_list)
 
-    solar_day = task["solar_day"]
-    tile_id_x = task["tile_id_x"]
-    tile_id_y = task["tile_id_y"]
-    task_datasets_ids = task["task_datasets_ids"]
+    failed_tasks = []
+    for idx, task in enumerate(tasks):
+        _log.info(f"Processing task: {task}   {idx+1}/{len(tasks)}")
 
-    task_id_tuple = (solar_day, tile_id_x, tile_id_y)
-    task_id_str = get_task_id_str_from_tuple(task_id_tuple)
+        solar_day = task["solar_day"]
+        tile_id_x = task["tile_id_x"]
+        tile_id_y = task["tile_id_y"]
+        task_datasets_ids = task["task_datasets_ids"]
 
-    if run_type == "backlog-processing":
+        task_id_tuple = (solar_day, tile_id_x, tile_id_y)
+        task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
-        if not overwrite:
-            exists = check_task_exists(task_id_str=task_id_str, engine=engine)
+        try:
 
-        if overwrite or not exists:
-            waterbody_observations = get_waterbody_observations(
-                solar_day=solar_day,
-                tile_id_x=tile_id_x,
-                tile_id_y=tile_id_y,
-                task_datasets_ids=task_datasets_ids,
-                historical_extent_rasters_directory=historical_extent_rasters_directory,
-                dc=dc,
-            )
-            if waterbody_observations is None:
-                _log.info(f"Task {task_id_str} has no waterbody observations")
-            else:
-                # add_waterbody_observations_to_db(
-                #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-                # )
-                _log.info(
-                    f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+            if run_type == "backlog-processing":
+
+                if not overwrite:
+                    exists = check_task_exists(task_id_str=task_id_str, engine=engine)
+
+                if overwrite or not exists:
+                    waterbody_observations = get_waterbody_observations(
+                        solar_day=solar_day,
+                        tile_id_x=tile_id_x,
+                        tile_id_y=tile_id_y,
+                        task_datasets_ids=task_datasets_ids,
+                        historical_extent_rasters_directory=historical_extent_rasters_directory,
+                        dc=dc,
+                    )
+                    if waterbody_observations is None:
+                        _log.info(f"Task {task_id_str} has no waterbody observations")
+                    else:
+                        # add_waterbody_observations_to_db(
+                        #    waterbody_observations=waterbody_observations, engine=engine,
+                        #    update_rows=True
+                        # )
+                        _log.info(
+                            f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                        )
+
+                        _log.info(f"Task {task_id_str} complete")
+                else:
+                    _log.info(f"Task {task_id_str} already exists, skipping")
+
+            elif run_type == "gap-filling":
+                # Find the dataset ids for the task.
+                task_datasets_ids = find_task_datasets_ids(
+                    solar_day=solar_day,
+                    tile_id_x=tile_id_x,
+                    tile_id_y=tile_id_y,
+                    dc=dc,
+                    product=product,
                 )
+                waterbody_observations = get_waterbody_observations(
+                    solar_day=solar_day,
+                    tile_id_x=tile_id_x,
+                    tile_id_y=tile_id_y,
+                    task_datasets_ids=task_datasets_ids,
+                    historical_extent_rasters_directory=historical_extent_rasters_directory,
+                    dc=dc,
+                )
+                if waterbody_observations is None:
+                    _log.info(f"Task {task_id_str} has no waterbody observations")
+                else:
+                    # add_waterbody_observations_to_db(
+                    #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
+                    # )
+                    _log.info(
+                        f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                    )
 
-                _log.info(f"Task {task_id_str} complete")
-        else:
-            _log.info(f"Task {task_id_str} already exists, skipping")
+                    _log.info(f"Task {task_id_str} complete")
+        except Exception as error:
+            _log.exception(error)
+            _log.error(f"Failed to process task {task}")
+            failed_tasks.append(task)
 
-    elif run_type == "gap-filling":
-        # Find the dataset ids for the task.
-        task_datasets_ids = find_task_datasets_ids(
-            solar_day=solar_day, tile_id_x=tile_id_x, tile_id_y=tile_id_y, dc=dc, product=product
-        )
-        waterbody_observations = get_waterbody_observations(
-            solar_day=solar_day,
-            tile_id_x=tile_id_x,
-            tile_id_y=tile_id_y,
-            task_datasets_ids=task_datasets_ids,
-            historical_extent_rasters_directory=historical_extent_rasters_directory,
-            dc=dc,
-        )
-        if waterbody_observations is None:
-            _log.info(f"Task {task_id_str} has no waterbody observations")
-        else:
-            # add_waterbody_observations_to_db(
-            #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-            # )
-            _log.info(
-                f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
-            )
+    if failed_tasks:
+        failed_tasks_json_array = json.dumps(failed_tasks)
 
-            _log.info(f"Task {task_id_str} complete")
+        tasks_directory = "/tmp/"
+        fs = get_filesystem(path=tasks_directory)
+
+        if not check_directory_exists(path=tasks_directory):
+            fs.mkdirs(path=tasks_directory, exist_ok=True)
+            _log.info(f"Created directory {tasks_directory}")
+
+        failed_tasks_output_file = os.path.join(tasks_directory, "failed_tasks")
+        with fs.open(failed_tasks_output_file, "a") as file:
+            file.write(failed_tasks_json_array + "\n")
+        _log.info(f"Failed tasks written to {failed_tasks_output_file}")
