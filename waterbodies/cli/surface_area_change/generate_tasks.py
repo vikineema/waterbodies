@@ -140,6 +140,7 @@ def generate_tasks(
 
     task_chunks = np.array_split(np.array(sorted_tasks), max_parallel_steps)
     task_chunks = [chunk.tolist() for chunk in task_chunks]
+    task_chunks = list(filter(None, task_chunks))
     task_chunks_count = str(len(task_chunks))
     task_chunks_json_array = json.dumps(task_chunks)
 
