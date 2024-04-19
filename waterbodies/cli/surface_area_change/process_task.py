@@ -41,11 +41,6 @@ from waterbodies.text import get_task_id_str_from_tuple
     help="Path to the directory containing the historical extent raster files.",
 )
 @click.option(
-    "--tasks-directory",
-    type=str,
-    help="Directory to write the failed tasks file to",
-)
-@click.option(
     "--overwrite/--no-overwrite",
     default=False,
     help=(
