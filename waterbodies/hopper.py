@@ -135,21 +135,24 @@ def create_tasks_from_scenes(
     scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] | None = None
 ) -> list[dict]:
     """
-    Create a list of tasks to be processed for the scenes/datasets provided.
+    Create a list of tasks to be processed from the datasets provided.
 
     Parameters
     ----------
     scenes : list[Dataset]
-        A list of scenes/datasets to create tasks for.
-    tile_ids_of_interest : list[tuple[int]] | None, optional
-        Only create tasks for scenes whose tile id is in the list of
-        tile ids provided if not None, by default None
+        A list of datasets to create tasks for.
+    tiles_containing_waterbodies : list[tuple[int]] | None, optional
+        List of tile IDs (x, y) for which tasks should be created. Each tuple
+        represents the tile index in the format (tile_id_x, tile_id_y).
+        If provided, only datasets matching the specified tile IDs will be considered
+        for task creation. If None, all datasets are considered.
 
     Returns
     -------
     list[dict]
-        A list of tasks with each tasks containing the task id (solar_day, tile id x, tile id y)
-        and Datasets UUID
+        A list of tasks, where each task is represented by a dictionary containing
+        the task ID (solar_day, tile_id_x, tile_id_y) and UUIDs for the datasets
+        matching the solar day and tile index (tile_id_x, tile_id_y) of the task.
     """
 
     cells = {}
