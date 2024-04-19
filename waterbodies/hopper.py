@@ -4,7 +4,6 @@ from types import SimpleNamespace
 from warnings import warn
 
 import toolz
-from datacube import Datacube
 from datacube.model import Dataset
 from odc.dscache.tools import solar_offset
 from odc.geo.geom import Geometry
@@ -20,7 +19,7 @@ _log = logging.getLogger(__name__)
 
 # Copied from
 # https://github.com/opendatacube/odc-dscache/blob/35c2f46e10f5b6cd64ae974b48f11ae2c34141d2/odc/dscache/tools/_index.py#L180C5-L180C23
-# becuase of difference in behaviour between datacube.utils.geometry.Geometry
+# because of difference in behaviour between datacube.utils.geometry.Geometry
 # and odc.geo.geom.Geometry
 def bin_dataset_stream(gridspec, dss, cells, persist=None):
     """
@@ -128,101 +127,55 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     # Remove duplicate source uids
     # Duplicates occur when queried datasets are captured around UTC midnight
     # and around weekly boundary
-    # From the compressed datasets keep only the dataset uuids
     tasks = {task_id: [str(ds.id) for ds in set(dss)] for task_id, dss in tasks.items()}
     return tasks
 
 
-def create_tasks_from_scenes(
-    scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] = []
+def create_tasks_from_datasets(
+    datasets: list[Dataset], tile_ids_of_interest: list[tuple[int]] | None = None
 ) -> list[dict]:
     """
-    Create tasks to run from scenes.
+    Create a list of tasks to be processed from the datasets provided.
 
     Parameters
     ----------
-    scenes : list[Dataset]
-        Scenes to  create tasks for.
-    tile_ids_of_interest : list[tuple[int]], optional
-        Tile ids of interest, by default []
+    datasets : list[Dataset]
+        A list of datasets to create tasks for.
+    tile_ids_of_interest : list[tuple[int]] | None, optional
+        List of tile IDs (x, y) for which tasks should be created. Each tuple
+        represents the tile index in the format (tile_id_x, tile_id_y).
+        If provided, only datasets matching the specified tile IDs will be considered
+        for task creation. If None, all datasets are considered.
 
     Returns
     -------
     list[dict]
-        A list of tasks with each tasks containing the task id (solar_day, tile id x, tile id y)
-        and Datasets UUID
+        A list of tasks, where each task is represented by a dictionary containing
+        the task ID (solar_day, tile_id_x, tile_id_y) and UUIDs for the datasets
+        matching the solar day and tile index (tile_id_x, tile_id_y) of the task.
     """
 
     cells = {}
 
     dss = bin_dataset_stream(
-        gridspec=WaterbodiesGrid().gridspec, dss=scenes, cells=cells, persist=persist
+        gridspec=WaterbodiesGrid().gridspec, dss=datasets, cells=cells, persist=persist
     )
 
-    with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
+    with tqdm(
+        iterable=dss, desc=f"Processing {len(datasets)} datasets", total=len(datasets)
+    ) as dss:
         for _ in dss:
             pass
 
     if tile_ids_of_interest:
-        _log.info(
-            f"Filter the {len(cells)} cells to keep only the cells "
-            f"containing the {len(tile_ids_of_interest)} tile ids of interest."
-        )
         cells = {
             tile_id: cell for tile_id, cell in cells.items() if tile_id in tile_ids_of_interest
         }
-        _log.info(f"Total number of cells after filtering: {len(cells)}")
     else:
-        _log.info(f"Total number of cells: {len(cells)}")
+        pass
 
-    _log.info("For each cell, group the datasets by solar day")
     tasks = bin_by_solar_day(cells=cells)
 
-    # Convert from dictionary to list of dictionaries.
     tasks = [{task_id: task_datasets_ids} for task_id, task_datasets_ids in tasks.items()]
 
-    _log.info(f"Total number of tasks: {len(tasks)}")
-
     return tasks
-
-
-def find_task_datasets_ids(
-    solar_day: str,
-    tile_id_x: int,
-    tile_id_y: int,
-    dc: Datacube,
-    product: str,
-) -> list[str]:
-    """
-    Get the dataset ids for a task
-
-    Parameters
-    ----------
-    solar_day : str
-        Solar day part of the task id.
-    tile_id_x : int
-        X tile id part of the task id
-    tile_id_y : int
-        Y tile id part of the task id.
-    dc : Datacube
-        Datacube connection
-    product : str
-        Product to query to get datasets.
-
-    Returns
-    -------
-    list[str]
-        IDs of the datasets for the task
-    """
-
-    tile_id = (tile_id_x, tile_id_y)
-
-    tile_geobox = WaterbodiesGrid().gridspec.tile_geobox(tile_index=tile_id)
-
-    task_datasets = dc.find_datasets(
-        product=product, time=(solar_day), like=tile_geobox, group_by="solar_day"
-    )
-
-    task_datasets_ids = [str(ds.id) for ds in task_datasets]
-
-    return task_datasets_ids
