@@ -65,7 +65,6 @@ def generate_tasks(
             directory_path=historical_extent_rasters_directory
         )
 
-    # Get the tile_ids for tiles that actually contain waterbodies.
     tile_ids_of_interest = [
         get_tile_id_tuple_from_filename(file_path=raster_file)
         for raster_file in historical_extent_rasters
@@ -85,7 +84,7 @@ def generate_tasks(
         tasks = create_tasks_from_scenes(scenes=scenes, tile_ids_of_interest=tile_ids_of_interest)
 
     elif run_type == "gap-filling":
-        # The difference between gap-filling and the bcklog-processing is here
+        # The difference between gap-filling and the backlog-processing is here
         # we are searching for datasets by their creation date (`creation_time`),
         # not their acquisition date (`time`).
         dc_query = dict(product=product, creation_time=(temporal_range_.start, temporal_range_.end))
@@ -104,28 +103,28 @@ def generate_tasks(
         tasks = [{task_id: []} for task_id in task_ids]
 
     tasks = [format_task(task) for task in tasks]
+    sorted_tasks = sorted(tasks, key=lambda x: x["solar_day"])
+    _log.info(f"Total number of tasks: {len(sorted_tasks)}")
 
-    # Split the list into chunks.
-    task_chunks = np.array_split(np.array(tasks), max_parallel_steps)
+    task_chunks = np.array_split(np.array(sorted_tasks), max_parallel_steps)
     task_chunks = [chunk.tolist() for chunk in task_chunks]
-
-    # Convert list to json array.
+    task_chunks_count = str(len(task_chunks))
     task_chunks_json_array = json.dumps(task_chunks)
 
     tasks_directory = "/tmp/"
+    tasks_output_file = os.path.join(tasks_directory, "tasks")
+    tasks_count_file = os.path.join(tasks_directory, "tasks_count")
+
     fs = get_filesystem(path=tasks_directory)
 
     if not check_directory_exists(path=tasks_directory):
         fs.mkdirs(path=tasks_directory, exist_ok=True)
         _log.info(f"Created directory {tasks_directory}")
 
-    tasks_output_file = os.path.join(tasks_directory, "tasks")
-    tasks_count_file = os.path.join(tasks_directory, "tasks_count")
-
     with fs.open(tasks_output_file, "w") as file:
         file.write(task_chunks_json_array)
     _log.info(f"Tasks written to {tasks_output_file}")
 
     with fs.open(tasks_count_file, "w") as file:
-        file.write(str(len(task_chunks)))
+        file.write(task_chunks_count)
     _log.info(f"Tasks count written to {tasks_count_file}")
