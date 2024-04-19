@@ -131,15 +131,15 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
     return tasks
 
 
-def create_tasks_from_scenes(
-    scenes: list[Dataset], tile_ids_of_interest: list[tuple[int]] | None = None
+def create_tasks_from_datasets(
+    datasets: list[Dataset], tile_ids_of_interest: list[tuple[int]] | None = None
 ) -> list[dict]:
     """
     Create a list of tasks to be processed from the datasets provided.
 
     Parameters
     ----------
-    scenes : list[Dataset]
+    datasets : list[Dataset]
         A list of datasets to create tasks for.
     tiles_containing_waterbodies : list[tuple[int]] | None, optional
         List of tile IDs (x, y) for which tasks should be created. Each tuple
@@ -158,10 +158,12 @@ def create_tasks_from_scenes(
     cells = {}
 
     dss = bin_dataset_stream(
-        gridspec=WaterbodiesGrid().gridspec, dss=scenes, cells=cells, persist=persist
+        gridspec=WaterbodiesGrid().gridspec, dss=datasets, cells=cells, persist=persist
     )
 
-    with tqdm(iterable=dss, desc=f"Processing {len(scenes):8,d} scenes", total=len(scenes)) as dss:
+    with tqdm(
+        iterable=dss, desc=f"Processing {len(datasets)} datasets", total=len(datasets)
+    ) as dss:
         for _ in dss:
             pass
 
