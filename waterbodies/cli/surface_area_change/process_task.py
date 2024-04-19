@@ -6,7 +6,6 @@ import click
 from datacube import Datacube
 
 from waterbodies.db import get_waterbodies_engine
-from waterbodies.hopper import find_task_datasets_ids
 from waterbodies.io import check_directory_exists, get_filesystem
 from waterbodies.logs import logging_setup
 from waterbodies.surface_area_change import (  # noqa F401
@@ -64,8 +63,6 @@ def process_tasks(
         _log.error(e)
         raise e
 
-    product = "wofs_ls"
-
     dc = Datacube(app=run_type)
 
     engine = get_waterbodies_engine()
@@ -116,14 +113,6 @@ def process_tasks(
                     _log.info(f"Task {task_id_str} already exists, skipping")
 
             elif run_type == "gap-filling":
-                # Find the dataset ids for the task.
-                task_datasets_ids = find_task_datasets_ids(
-                    solar_day=solar_day,
-                    tile_id_x=tile_id_x,
-                    tile_id_y=tile_id_y,
-                    dc=dc,
-                    product=product,
-                )
                 waterbody_observations = get_waterbody_observations(
                     solar_day=solar_day,
                     tile_id_x=tile_id_x,
@@ -152,13 +141,14 @@ def process_tasks(
         failed_tasks_json_array = json.dumps(failed_tasks)
 
         tasks_directory = "/tmp/"
+        failed_tasks_output_file = os.path.join(tasks_directory, "failed_tasks")
+
         fs = get_filesystem(path=tasks_directory)
 
         if not check_directory_exists(path=tasks_directory):
             fs.mkdirs(path=tasks_directory, exist_ok=True)
             _log.info(f"Created directory {tasks_directory}")
 
-        failed_tasks_output_file = os.path.join(tasks_directory, "failed_tasks")
         with fs.open(failed_tasks_output_file, "a") as file:
             file.write(failed_tasks_json_array + "\n")
         _log.info(f"Failed tasks written to {failed_tasks_output_file}")
