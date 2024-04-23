@@ -100,29 +100,55 @@ def persist(ds: Dataset) -> CompressedDataset:
     return _ds
 
 
-def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int, int], list[str]]:
+def bin_by_tile_index(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int, int], list[str]]:
     """
-    Bin by solar day.
+    Bin grid spec cells intersected with datasets by tile index.
 
     Parameters
     ----------
     cells : dict[tuple[int, int], Cell]
-        Cells to bin.
+        Grid spec cells intersected with datasets to bin.
 
     Returns
     -------
     dict[tuple[str, int, int], list[str]]
-        Tasks containing the task id (solar_day, tile id x, tile id y) and Datasets UUIDs
+        Tasks containing the task id (tile index x, tile index y) and Datasets UUIDs
         for the task.
     """
     tasks = {}
-    for tile_id, cell in cells.items():
+    for tile_index, cell in cells.items():
+        tasks[tile_index] = cell.dss
+
+    # Remove duplicate source uids
+    # Duplicates occur when queried datasets are captured around UTC midnight
+    # and around weekly boundary
+    tasks = {task_id: [str(ds.id) for ds in set(dss)] for task_id, dss in tasks.items()}
+    return tasks
+
+
+def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int, int], list[str]]:
+    """
+    Bin grid spec cells intersected with datasets by tile index and solar day.
+
+    Parameters
+    ----------
+    cells : dict[tuple[int, int], Cell]
+        Grid spec cells intersected with datasets to bin.
+
+    Returns
+    -------
+    dict[tuple[str, int, int], list[str]]
+        Tasks containing the task id (solar_day, tile index x, tile index y) and Datasets UUIDs
+        for the task.
+    """
+    tasks = {}
+    for tile_index, cell in cells.items():
         utc_offset = cell.utc_offset
         grouped_by_solar_day = toolz.groupby(lambda ds: (ds.time + utc_offset).date(), cell.dss)
 
         for solar_day_date, dss in grouped_by_solar_day.items():
             solar_day_key = (solar_day_date.strftime("%Y-%m-%d"),)
-            tasks[solar_day_key + tile_id] = dss
+            tasks[solar_day_key + tile_index] = dss
 
     # Remove duplicate source uids
     # Duplicates occur when queried datasets are captured around UTC midnight
@@ -132,7 +158,9 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
 
 
 def create_tasks_from_datasets(
-    datasets: list[Dataset], tile_ids_of_interest: list[tuple[int]] | None = None
+    datasets: list[Dataset],
+    tile_ids_of_interest: list[tuple[int]] | None = None,
+    bin_solar_day: bool = True,
 ) -> list[dict]:
     """
     Create a list of tasks to be processed from the datasets provided.
@@ -146,7 +174,9 @@ def create_tasks_from_datasets(
         represents the tile index in the format (tile_id_x, tile_id_y).
         If provided, only datasets matching the specified tile IDs will be considered
         for task creation. If None, all datasets are considered.
-
+    bin_solar_day : bool, optional
+        If `bin_solar_day==True` tasks will be grouped by tile index and solar day. If
+        `bin_solar_day==False`, tasks will only be grouped by tile index.
     Returns
     -------
     list[dict]
@@ -174,7 +204,10 @@ def create_tasks_from_datasets(
     else:
         pass
 
-    tasks = bin_by_solar_day(cells=cells)
+    if bin_solar_day:
+        tasks = bin_by_solar_day(cells=cells)
+    else:
+        tasks = bin_by_tile_index(cells=cells)
 
     tasks = [{task_id: task_datasets_ids} for task_id, task_datasets_ids in tasks.items()]
 

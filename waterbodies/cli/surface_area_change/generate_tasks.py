@@ -85,7 +85,7 @@ def generate_tasks(
         datasets = dc.find_datasets(**dc_query)
         _log.info(f"Found {len(datasets)} datasets matching the query {dc_query}")
         tasks = create_tasks_from_datasets(
-            datasets=datasets, tile_ids_of_interest=tiles_containing_waterbodies
+            datasets=datasets, tile_ids_of_interest=tiles_containing_waterbodies, bin_solar_day=True
         )
 
     elif run_type == "gap-filling":
@@ -108,7 +108,9 @@ def generate_tasks(
         _log.info(f"Found {len(datasets_)} datasets matching the query {dc_query_}")
 
         tasks_ = create_tasks_from_datasets(
-            datasets=datasets_, tile_ids_of_interest=tiles_containing_waterbodies
+            datasets=datasets_,
+            tile_ids_of_interest=tiles_containing_waterbodies,
+            bin_solar_day=True,
         )
 
         # Update each task with the datasets whose acquisition time matches
@@ -129,7 +131,7 @@ def generate_tasks(
             dc_query = dict(product=product, time=(solar_day))
             datasets = dc.find_datasets(**dc_query)
             updated_tasks = create_tasks_from_datasets(
-                datasets=datasets, tile_ids_of_interest=task_tile_ids
+                datasets=datasets, tile_ids_of_interest=task_tile_ids, bin_solar_day=True
             )
             tasks.extend(updated_tasks)
             idx += 1
