@@ -1,6 +1,14 @@
 import logging
 
 import geopandas as gpd
+import numpy as np
+from datacube import Datacube
+from rasterio.features import shapes
+from scipy.ndimage import distance_transform_edt
+from shapely.geometry import shape
+from skimage.measure import regionprops
+from skimage.morphology import disk, erosion, label, remove_small_objects
+from skimage.segmentation import watershed
 from sqlalchemy import insert, select, update
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
@@ -8,6 +16,7 @@ from sqlalchemy.schema import Table
 
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyHistoricalExtent
+from waterbodies.grid import WaterbodiesGrid
 from waterbodies.io import check_file_exists, load_vector_file
 
 _log = logging.getLogger(__name__)
@@ -176,3 +185,101 @@ def load_waterbodies_from_db(engine: Engine) -> gpd.GeoDataFrame:
     waterbodies = gpd.read_postgis(sql_query, engine, geom_col="geometry")
 
     return waterbodies
+
+
+def get_waterbodies(
+    tile_id_x: int,
+    tile_id_y: int,
+    task_datasets_ids: list[str],
+    dc: Datacube,
+    location_threshold: float = 0.1,
+    extent_threshold: float = 0.05,
+    min_valid_observations: int = 60,
+):
+    gridspec = WaterbodiesGrid().gridspec
+    tile_index = (tile_id_x, tile_id_y)
+    tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
+    task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
+
+    # Load the task datasets.
+    # It is expected that for the wofs_ls_summary_alltime product
+    # there is one time step for each tile, however in case of
+    # multiple, pick the most recent time.
+    ds = dc.load(
+        datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
+    ).isel(time=-1)
+
+    ds["count_clear"] = ds["count_clear"].where(ds["count_clear"] != -999)
+    valid_clear_count = ds["count_clear"] >= min_valid_observations
+
+    valid_location = np.logical_and(ds["frequency"] > location_threshold, valid_clear_count).astype(
+        int
+    )
+    valid_extent = np.logical_and(ds["frequency"] > extent_threshold, valid_clear_count).astype(int)
+
+    # Label connected regions in the valid_extent DataArray
+    # each region is considered a waterbody.
+    labelled_waterbodies = label(label_image=valid_extent.values, background=0)
+    # Remove waterbodies smaller than 5 pixels.
+    labelled_waterbodies = remove_small_objects(labelled_waterbodies, min_size=5, connectivity=1)
+
+    # Identify waterbodies larger than 1000 pixels.
+    large_waterbodies_labels = [
+        region.label
+        for region in regionprops(label_image=labelled_waterbodies)
+        if region.num_pixels > 1000
+    ]
+    # Create a binary mask of the large waterbodies
+    large_waterbodies_mask = np.where(np.isin(labelled_waterbodies, large_waterbodies_labels), 1, 0)
+    # Remove the large waterbodies from the labelled image.
+    labelled_waterbodies = np.where(large_waterbodies_mask == 1, 0, labelled_waterbodies)
+    # Erode the location threshold pixels by 1.
+    valid_location_eroded = erosion(image=valid_location.values, footprint=disk(radius=1))
+    # Create the watershed segmentation markers by labelling the eroded image.
+    watershed_segmentation_markers = label(label_image=valid_location_eroded, background=0)
+    # Remove markers smaller than 100 pixels.
+    watershed_segmentation_markers = remove_small_objects(
+        watershed_segmentation_markers, min_size=100, connectivity=1
+    )
+    # Segment the large waterbodies using watershed segmentation
+    segmented_large_waterbodies = watershed(
+        image=-distance_transform_edt(large_waterbodies_mask),
+        markers=watershed_segmentation_markers,
+        mask=large_waterbodies_mask,
+    )
+    # Add the segmented large waterbodies.
+    labelled_waterbodies = np.where(
+        large_waterbodies_mask == 1, segmented_large_waterbodies, labelled_waterbodies
+    )
+
+    # Only keep waterbodies that contain a waterbody pixel from the valid_location DataArray.
+    def waterbody_pixel_count(regionmask, intensity_image):
+        return np.sum(intensity_image[regionmask])
+
+    valid_waterbodies_labels = [
+        region.label
+        for region in regionprops(
+            label_image=labelled_waterbodies,
+            intensity_image=valid_location.values,
+            extra_properties=[waterbody_pixel_count],
+        )
+        if region.waterbody_pixel_count > 0
+    ]
+    valid_waterbodies = np.where(
+        np.isin(labelled_waterbodies, valid_waterbodies_labels), labelled_waterbodies, 0
+    )
+    # Relabel the waterbodies and remove waterbodies smaller than 6 pixels.
+    valid_waterbodies = label(label_image=valid_waterbodies, background=0)
+    valid_waterbodies = remove_small_objects(valid_waterbodies, min_size=6, connectivity=1)
+
+    # Vectorize the waterbodies.
+    polygon_value_pairs = list(
+        shapes(
+            source=valid_waterbodies.astype(np.int32),
+            mask=valid_waterbodies > 0,
+            transform=tile_geobox.transform,
+        )
+    )
+    polygons = [shape(polygon_value_pair[0]) for polygon_value_pair in polygon_value_pairs]
+    polygons_gdf = gpd.GeoDataFrame(geometry=polygons, crs=tile_geobox.crs)
+    return polygons_gdf
