@@ -34,8 +34,8 @@ class WaterbodyObservation(WaterbodyBase):
     area_dry_m2: Mapped[float] = Column(Float)
     px_invalid: Mapped[int] = Column(Integer)
     area_invalid_m2: Mapped[float] = Column(Float)
-    date: Mapped[datetime] = Column(Date)
-    task_id: Mapped[str] = Column(String)
+    date: Mapped[datetime] = Column(Date, index=True)
+    task_id: Mapped[str] = Column(String, index=True)
 
     def __repr__(self) -> str:
         return (
