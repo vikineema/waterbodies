@@ -100,13 +100,14 @@ def process_tasks(
                     if waterbody_observations is None:
                         _log.info(f"Task {task_id_str} has no waterbody observations")
                     else:
-                        # add_waterbody_observations_to_db(
-                        #    waterbody_observations=waterbody_observations, engine=engine,
-                        #    update_rows=True
-                        # )
-                        _log.info(
-                            f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                        add_waterbody_observations_to_db(
+                            waterbody_observations=waterbody_observations,
+                            engine=engine,
+                            update_rows=True,
                         )
+                        # _log.info(
+                        #     f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                        # )
 
                         _log.info(f"Task {task_id_str} complete")
                 else:
@@ -124,12 +125,14 @@ def process_tasks(
                 if waterbody_observations is None:
                     _log.info(f"Task {task_id_str} has no waterbody observations")
                 else:
-                    # add_waterbody_observations_to_db(
-                    #    waterbody_observations=waterbody_observations, engine=engine, update_rows=True
-                    # )
-                    _log.info(
-                        f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                    add_waterbody_observations_to_db(
+                        waterbody_observations=waterbody_observations,
+                        engine=engine,
+                        update_rows=True,
                     )
+                    # _log.info(
+                    #    f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
+                    # )
 
                     _log.info(f"Task {task_id_str} complete")
         except Exception as error:
