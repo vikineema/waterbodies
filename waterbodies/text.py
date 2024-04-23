@@ -87,7 +87,9 @@ def get_task_id_tuple_from_str(task_id_str: str) -> tuple[str, int, int]:
     return task_id_tuple
 
 
-def format_task(task: dict[tuple[str, int, int], list[str]]) -> dict:
+def format_task(
+    task: dict[tuple[str, int, int], list[str]] | dict[tuple[int, int], list[str]]
+) -> dict:
     """
     Format task.
 
@@ -105,13 +107,21 @@ def format_task(task: dict[tuple[str, int, int], list[str]]) -> dict:
     assert len(task) == 1
     task_id, task_datasets_ids = next(iter(task.items()))
 
-    solar_day, tile_id_x, tile_id_y = task_id
+    if len(task_id) == 3:
+        solar_day, tile_id_x, tile_id_y = task_id
 
-    task = dict(
-        solar_day=solar_day,
-        tile_id_x=tile_id_x,
-        tile_id_y=tile_id_y,
-        task_datasets_ids=task_datasets_ids,
-    )
+        task = dict(
+            solar_day=solar_day,
+            tile_id_x=tile_id_x,
+            tile_id_y=tile_id_y,
+            task_datasets_ids=task_datasets_ids,
+        )
+    elif len(task_id) == 2:
+        tile_id_x, tile_id_y = task_id
 
+        task = dict(
+            tile_id_x=tile_id_x,
+            tile_id_y=tile_id_y,
+            task_datasets_ids=task_datasets_ids,
+        )
     return task
