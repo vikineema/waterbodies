@@ -33,7 +33,11 @@ from waterbodies.text import get_task_id_str_from_tuple
         case_sensitive=True,
     ),
 )
-@click.option("--task-list", type=str, help="List of tasks to process")
+@click.option(
+    "--tasks-list-file",
+    type=str,
+    help="Path to the text file containing the list of tasks to process.",
+)
 @click.option(
     "--historical-extent-rasters-directory",
     type=str,
@@ -50,7 +54,7 @@ from waterbodies.text import get_task_id_str_from_tuple
 def process_tasks(
     verbose,
     run_type,
-    task_list,
+    tasks_list_file,
     historical_extent_rasters_directory,
     overwrite,
 ):
@@ -67,7 +71,11 @@ def process_tasks(
 
     engine = get_waterbodies_engine()
 
-    tasks = json.loads(task_list)
+    fs = get_filesystem(path=tasks_list_file)
+    with fs.open(tasks_list_file) as file:
+        content = file.read()
+        decoded_content = content.decode()
+        tasks = json.loads(decoded_content)
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
