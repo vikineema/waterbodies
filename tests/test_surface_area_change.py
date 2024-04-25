@@ -62,8 +62,8 @@ def test_generate_tasks_cli_backlog_processing(
     task_list = json.loads(task_list_str)
 
     assert task_list[0]["solar_day"] == expected_result[0]["solar_day"]
-    assert task_list[0]["tile_id_x"] == expected_result[0]["tile_id_x"]
-    assert task_list[0]["tile_id_y"] == expected_result[0]["tile_id_y"]
+    assert task_list[0]["tile_index_x"] == expected_result[0]["tile_index_x"]
+    assert task_list[0]["tile_index_y"] == expected_result[0]["tile_index_y"]
     assert sorted(task_list[0]["task_datasets_ids"]) == sorted(
         expected_result[0]["task_datasets_ids"]
     )
@@ -76,8 +76,8 @@ def test_process_tasks_cli_backlog_processing(
 
     run_type = "backlog-processing"
     solar_day = reference_task["solar_day"]
-    tile_id_x = reference_task["tile_id_x"]
-    tile_id_y = reference_task["tile_id_y"]
+    tile_index_x = reference_task["tile_index_x"]
+    tile_index_y = reference_task["tile_index_y"]
     task_datasets_ids = 'reference_task["task_datasets_ids"]'
     historical_extent_rasters_directory = "tests/data/historical_extent_rasters_directory"
 
@@ -85,8 +85,8 @@ def test_process_tasks_cli_backlog_processing(
         "--verbose",
         f"--run-type={run_type}",
         f"--solar-day={solar_day}",
-        f"--tile-id-x={tile_id_x}",
-        f"--tile-id-y={tile_id_y}",
+        f"--tile-id-x={tile_index_x}",
+        f"--tile-id-y={tile_index_y}",
         f"--task-datasets-ids='{task_datasets_ids}'",
         f"--historical-extent-rasters-directory={historical_extent_rasters_directory}",
         "--overwrite",
