@@ -159,7 +159,7 @@ def bin_by_solar_day(cells: dict[tuple[int, int], Cell]) -> dict[tuple[str, int,
 
 def create_tasks_from_datasets(
     datasets: list[Dataset],
-    tile_ids_of_interest: list[tuple[int]] | None = None,
+    tile_index_filter: list[tuple[int]] | None = None,
     bin_solar_day: bool = True,
 ) -> list[dict]:
     """
@@ -169,10 +169,10 @@ def create_tasks_from_datasets(
     ----------
     datasets : list[Dataset]
         A list of datasets to create tasks for.
-    tile_ids_of_interest : list[tuple[int]] | None, optional
-        List of tile IDs (x, y) for which tasks should be created. Each tuple
-        represents the tile index in the format (tile_id_x, tile_id_y).
-        If provided, only datasets matching the specified tile IDs will be considered
+    tile_index_filter : list[tuple[int]] | None, optional
+        List of tile indices (x, y) for which tasks should be created. Each tuple
+        represents the tile index in the format (tile_index_x, tile_index_y).
+        If provided, only datasets matching the specified tile indices will be considered
         for task creation. If None, all datasets are considered.
     bin_solar_day : bool, optional
         If `bin_solar_day==True` tasks will be grouped by tile index and solar day. If
@@ -181,8 +181,8 @@ def create_tasks_from_datasets(
     -------
     list[dict]
         A list of tasks, where each task is represented by a dictionary containing
-        the task ID (solar_day, tile_id_x, tile_id_y) and UUIDs for the datasets
-        matching the solar day and tile index (tile_id_x, tile_id_y) of the task.
+        the task ID (solar_day, tile_index_x, tile_index_y) and UUIDs for the datasets
+        matching the solar day and tile index (tile_index_x, tile_index_y) of the task.
     """
 
     cells = {}
@@ -197,9 +197,11 @@ def create_tasks_from_datasets(
         for _ in dss:
             pass
 
-    if tile_ids_of_interest:
+    if tile_index_filter:
         cells = {
-            tile_id: cell for tile_id, cell in cells.items() if tile_id in tile_ids_of_interest
+            tile_index: cell
+            for tile_index, cell in cells.items()
+            if tile_index in tile_index_filter
         }
     else:
         pass
