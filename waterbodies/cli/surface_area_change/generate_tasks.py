@@ -142,11 +142,12 @@ def generate_tasks(
     task_chunks = [chunk.tolist() for chunk in task_chunks]
     task_chunks = list(filter(None, task_chunks))
     task_chunks_count = str(len(task_chunks))
+    _log.info(f"{len(sorted_tasks)} tasks chunked into {task_chunks_count} chunks")
     task_chunks_json_array = json.dumps(task_chunks)
 
     tasks_directory = "/tmp/"
-    tasks_output_file = os.path.join(tasks_directory, "tasks")
-    tasks_count_file = os.path.join(tasks_directory, "tasks_count")
+    tasks_output_file = os.path.join(tasks_directory, "tasks_chunks")
+    tasks_count_file = os.path.join(tasks_directory, "tasks_chunks_count")
 
     fs = get_filesystem(path=tasks_directory)
 
@@ -156,8 +157,8 @@ def generate_tasks(
 
     with fs.open(tasks_output_file, "w") as file:
         file.write(task_chunks_json_array)
-    _log.info(f"Tasks written to {tasks_output_file}")
+    _log.info(f"Tasks chunks written to {tasks_output_file}")
 
     with fs.open(tasks_count_file, "w") as file:
         file.write(task_chunks_count)
-    _log.info(f"Tasks count written to {tasks_count_file}")
+    _log.info(f"Tasks chunks count written to {tasks_count_file}")
