@@ -57,7 +57,7 @@ def test_generate_tasks_cli_backlog_processing(
 
     assert result.exit_code == 0
 
-    bash_command = "cat /tmp/tasks | jq '.[0]'"
+    bash_command = "cat /tmp/tasks_chunks | jq '.[0]'"
     task_list_str = subprocess.check_output(bash_command, shell=True, universal_newlines=True)
     task_list = json.loads(task_list_str)
 
