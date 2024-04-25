@@ -19,7 +19,7 @@ from waterbodies.io import (
     load_vector_file,
 )
 from waterbodies.logs import logging_setup
-from waterbodies.text import get_tile_id_str_from_tuple
+from waterbodies.text import get_tile_index_str_from_tuple
 
 
 @click.command(
@@ -79,7 +79,7 @@ def rasterise_polygons(
         iterable=tiles, desc="Rasterise historical extent polygons by grid tile", total=len(tiles)
     ) as tiles:
         for tile in tiles:
-            tile_id, tile_geobox = tile
+            tile_index, tile_geobox = tile
 
             # Get the historical extent polygons that intersect with the extent of the tile's
             # Geobox.
@@ -113,6 +113,6 @@ def rasterise_polygons(
                 # Write the raster to file.
                 raster_path = os.path.join(
                     historical_extent_rasters_directory,
-                    f"{get_tile_id_str_from_tuple(tile_id)}.tif",
+                    f"{get_tile_index_str_from_tuple(tile_index)}.tif",
                 )
                 tile_raster_ds.rio.to_raster(raster_path=raster_path, tags=tags, compute=True)
