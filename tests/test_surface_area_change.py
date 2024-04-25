@@ -21,8 +21,8 @@ def runner():
 def reference_task():
     task = {
         "solar_day": "2016-04-05",
-        "tile_id_x": 199,
-        "tile_id_y": 35,
+        "tile_index_x": 199,
+        "tile_index_y": 35,
         "task_datasets_ids": [
             "180340f9-b365-506b-b561-153af5b1490d",
             "9b916e21-2229-5121-8333-0a8b3736d440",
