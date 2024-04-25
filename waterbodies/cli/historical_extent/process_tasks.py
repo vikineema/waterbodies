@@ -58,7 +58,7 @@ from waterbodies.text import get_tile_index_str_from_tuple
     default=False,
     help="Rerun tasks that have already been processed. ",
 )
-def process_task(
+def process_tasks(
     verbose,
     tasks_list_file,
     goas_rasters_directory,
