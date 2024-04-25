@@ -7,7 +7,13 @@ from rasterio.features import shapes
 from scipy.ndimage import distance_transform_edt
 from shapely.geometry import shape
 from skimage.measure import regionprops
-from skimage.morphology import disk, erosion, label, remove_small_objects
+from skimage.morphology import (
+    binary_erosion,
+    disk,
+    erosion,
+    label,
+    remove_small_objects,
+)
 from skimage.segmentation import watershed
 from sqlalchemy import insert, select, update
 from sqlalchemy.engine.base import Engine
@@ -17,7 +23,9 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyHistoricalExtent
 from waterbodies.grid import WaterbodiesGrid
-from waterbodies.io import check_file_exists, load_vector_file
+from waterbodies.io import check_file_exists, find_geotiff_files, load_vector_file
+from waterbodies.text import get_tile_index_str_from_tuple
+from waterbodies.utils import rio_slurp_xarray
 
 _log = logging.getLogger(__name__)
 
@@ -188,26 +196,52 @@ def load_waterbodies_from_db(engine: Engine) -> gpd.GeoDataFrame:
 
 
 def get_waterbodies(
-    tile_id_x: int,
-    tile_id_y: int,
+    tile_index_x: int,
+    tile_index_y: int,
     task_datasets_ids: list[str],
     dc: Datacube,
+    goas_rasters_directory: str,
     location_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
 ):
+    tile_index = (tile_index_x, tile_index_y)
+    tile_index_str = get_tile_index_str_from_tuple(tile_index)
     gridspec = WaterbodiesGrid().gridspec
-    tile_index = (tile_id_x, tile_id_y)
     tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
+
     task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
 
-    # Load the task datasets.
-    # It is expected that for the wofs_ls_summary_alltime product
+    goas_raster_file = find_geotiff_files(
+        directory_path=goas_rasters_directory, file_name_pattern=tile_index_str
+    )
+    if goas_raster_file:
+        # Load the global oceans and seas raster for the tile.
+        # Convert the oceans/seas pixels from 1 to 0 and the land pixels from 0 to 1.
+        land_sea_mask = np.logical_not(
+            rio_slurp_xarray(fname=goas_raster_file[0], gbox=tile_geobox)
+        ).astype(int)
+        # Erode the land pixels by 500 m
+        eroded_land_sea_mask = binary_erosion(
+            image=land_sea_mask.values,
+            footprint=disk(radius=500 / abs(land_sea_mask.geobox.resolution[0])),
+        )
+    else:
+        e = FileNotFoundError(
+            f"Tile {tile_index_str} does not have a Global Oceans and Seas "
+            f"raster in the directory {goas_rasters_directory}"
+        )
+        _log.error(e)
+        raise e
+
+    # Note: It is expected that for the wofs_ls_summary_alltime product
     # there is one time step for each tile, however in case of
     # multiple, pick the most recent time.
-    ds = dc.load(
-        datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
-    ).isel(time=-1)
+    ds = (
+        dc.load(datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox)
+        .isel(time=-1)
+        .where(eroded_land_sea_mask)
+    )
 
     ds["count_clear"] = ds["count_clear"].where(ds["count_clear"] != -999)
     valid_clear_count = ds["count_clear"] >= min_valid_observations
