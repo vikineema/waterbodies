@@ -16,7 +16,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyObservation
 from waterbodies.io import find_geotiff_files
-from waterbodies.text import get_task_id_str_from_tuple, get_tile_id_str_from_tuple
+from waterbodies.text import get_task_id_str_from_tuple, get_tile_index_str_from_tuple
 
 _log = logging.getLogger(__name__)
 
@@ -134,8 +134,8 @@ def get_pixel_counts(region_mask, intensity_image):
 
 def get_waterbody_observations(
     solar_day: str,
-    tile_id_x: int,
-    tile_id_y: int,
+    tile_index_x: int,
+    tile_index_y: int,
     task_datasets_ids: list[str],
     historical_extent_rasters_directory: str,
     dc: Datacube,
@@ -146,13 +146,13 @@ def get_waterbody_observations(
     Parameters
     ----------
     solar_day : str
-        Solar day part of the task id.
-    tile_id_x : int
-        X tile id part of the task id
-    tile_id_y : int
-        Y tile id part of the task id.
+        Solar day of the task.
+    tile_index_x : int
+        X tile index of the task.
+    tile_index_y : int
+        Y tile index of the task.
     task_datasets_ids: list[str]
-        IDs of the datasets for the task
+        IDs of the datasets for the task.
     historical_extent_rasters_directory : str
         Directory containing the historical extent rasters.
     dc : Datacube
@@ -164,15 +164,15 @@ def get_waterbody_observations(
         A DataFrame table containing the waterbody observations for the task
 
     """
-    task_id = (solar_day, tile_id_x, tile_id_y)
+    task_id = (solar_day, tile_index_x, tile_index_y)
     task_id_str = get_task_id_str_from_tuple(task_id)
 
-    tile_id = (tile_id_x, tile_id_y)
-    tile_id_str = get_tile_id_str_from_tuple(tile_id)
+    tile_index = (tile_index_x, tile_index_y)
+    tile_index_str = get_tile_index_str_from_tuple(tile_index)
 
     historical_extent_raster_file = find_geotiff_files(
         directory_path=historical_extent_rasters_directory,
-        file_name_pattern=tile_id_str,
+        file_name_pattern=tile_index_str,
     )
     if historical_extent_raster_file:
         historical_extent_raster = rioxarray.open_rasterio(
@@ -182,7 +182,7 @@ def get_waterbody_observations(
         wbid_to_uid = json.loads(historical_extent_raster.attrs["WB_ID_to_UID"])
     else:
         e = FileNotFoundError(
-            f"Tile {tile_id_str} does not have a historical extent "
+            f"Tile {tile_index_str} does not have a historical extent "
             f"raster in the directory {historical_extent_rasters_directory}"
         )
         _log.error(e)
