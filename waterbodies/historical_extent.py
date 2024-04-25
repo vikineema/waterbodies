@@ -204,7 +204,35 @@ def get_waterbodies(
     location_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
-):
+) -> gpd.GeoDataFrame:
+    """
+    Generate the waterbody polygons for a given task.
+
+    Parameters
+    ----------
+    tile_index_x : int
+        X tile index of the task.
+    tile_index_y : int
+        Y tile index of the task.
+    task_datasets_ids : list[str]
+        IDs of the datasets for the task.
+    dc : Datacube
+        Datacube connection
+    goas_rasters_directory : str
+        Directory containing the Global Oceans and Seas version 1 rasters.
+    location_threshold : float, optional
+        Threshold used to set the location of the waterbody polygons, by default 0.1
+    extent_threshold : float, optional
+        Threshold used to set the shape/extent of the waterbody polygons, by default 0.05
+    min_valid_observations : int, optional
+        Threshold to use to mask out pixels based on the number of valid WOfS
+        observations for each pixel, by default 60
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Waterbody polygons for the task.
+    """
     tile_index = (tile_index_x, tile_index_y)
     tile_index_str = get_tile_index_str_from_tuple(tile_index)
     gridspec = WaterbodiesGrid().gridspec
