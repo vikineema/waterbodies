@@ -82,11 +82,11 @@ def process_tasks(
         _log.info(f"Processing task: {task}   {idx+1}/{len(tasks)}")
 
         solar_day = task["solar_day"]
-        tile_id_x = task["tile_id_x"]
-        tile_id_y = task["tile_id_y"]
+        tile_index_x = task["tile_index_x"]
+        tile_index_y = task["tile_index_y"]
         task_datasets_ids = task["task_datasets_ids"]
 
-        task_id_tuple = (solar_day, tile_id_x, tile_id_y)
+        task_id_tuple = (solar_day, tile_index_x, tile_index_y)
         task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
         try:
@@ -99,8 +99,8 @@ def process_tasks(
                 if overwrite or not exists:
                     waterbody_observations = get_waterbody_observations(
                         solar_day=solar_day,
-                        tile_id_x=tile_id_x,
-                        tile_id_y=tile_id_y,
+                        tile_index_x=tile_index_x,
+                        tile_index_y=tile_index_y,
                         task_datasets_ids=task_datasets_ids,
                         historical_extent_rasters_directory=historical_extent_rasters_directory,
                         dc=dc,
@@ -124,8 +124,8 @@ def process_tasks(
             elif run_type == "gap-filling":
                 waterbody_observations = get_waterbody_observations(
                     solar_day=solar_day,
-                    tile_id_x=tile_id_x,
-                    tile_id_y=tile_id_y,
+                    tile_index_x=tile_index_x,
+                    tile_index_y=tile_index_y,
                     task_datasets_ids=task_datasets_ids,
                     historical_extent_rasters_directory=historical_extent_rasters_directory,
                     dc=dc,
