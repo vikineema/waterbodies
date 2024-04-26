@@ -15,7 +15,6 @@ class WaterbodyHistoricalExtent(WaterbodyBase):
     area_m2: Mapped[float] = Column(Float)
     length_m: Mapped[float] = Column(Float)
     perim_m: Mapped[float] = Column(Float)
-    timeseries: Mapped[str] = Column(String)
     geometry = Column(Geometry(geometry_type="POLYGON"))
 
     def __repr__(self) -> str:

@@ -118,7 +118,6 @@ def add_waterbodies_polygons_to_db(
                     wb_id=row.WB_ID,
                     length_m=row.length_m,
                     perim_m=row.perim_m,
-                    timeseries=row.timeseries,
                     geometry=f"SRID={srid};{row.geometry.wkt}",
                 )
             )
@@ -133,7 +132,6 @@ def add_waterbodies_polygons_to_db(
                             wb_id=row.WB_ID,
                             length_m=row.length_m,
                             perim_m=row.perim_m,
-                            timeseries=row.timeseries,
                             geometry=f"SRID={srid};{row.geometry.wkt}",
                         )
                     )
