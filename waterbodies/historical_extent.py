@@ -5,7 +5,7 @@ import numpy as np
 from datacube import Datacube
 from rasterio.features import shapes
 from scipy.ndimage import distance_transform_edt
-from shapely.geometry import shape
+from shapely.geometry import Point, Polygon, shape
 from skimage.measure import regionprops
 from skimage.morphology import (
     binary_erosion,
@@ -332,3 +332,38 @@ def get_waterbodies(
     polygons = [shape(polygon_value_pair[0]) for polygon_value_pair in polygon_value_pairs]
     polygons_gdf = gpd.GeoDataFrame(geometry=polygons, crs=tile_geobox.crs)
     return polygons_gdf
+
+
+def get_polygon_length(poly: Polygon) -> float:
+    """
+    Calculate the length of a polygon.
+
+    Parameters
+    ----------
+    poly : Polygon
+        Polygon to get length for.
+
+    Returns
+    -------
+    float
+        Length of polygon i.e. longest edge of the mminimum bounding of the polygon.
+    """
+    # Calculate the minimum bounding box (oriented rectangle) of the polygon
+    min_bbox = poly.minimum_rotated_rectangle
+
+    # Get the coordinates of polygon vertices.
+    x, y = min_bbox.exterior.coords.xy
+
+    # Get the length of bounding box edges
+    edge_length = (
+        Point(x[0], y[0]).distance(Point(x[1], y[1])),
+        Point(x[1], y[1]).distance(Point(x[2], y[2])),
+    )
+
+    # Get the length of polygon as the longest edge of the bounding box.
+    length = max(edge_length)
+
+    # Get width of the polygon as the shortest edge of the bounding box.
+    # width = min(edge_length)
+
+    return length
