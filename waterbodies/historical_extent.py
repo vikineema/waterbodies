@@ -23,7 +23,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyHistoricalExtent
 from waterbodies.grid import WaterbodiesGrid
-from waterbodies.io import check_file_exists, find_geotiff_files, load_vector_file
+from waterbodies.io import find_geotiff_files
 from waterbodies.text import get_tile_index_str_from_tuple
 from waterbodies.utils import rio_slurp_xarray
 
@@ -75,7 +75,7 @@ def create_waterbodies_historical_extent_table(engine: Engine) -> Table:
 
 
 def add_waterbodies_polygons_to_db(
-    waterbodies_polygons_file_path: str,
+    waterbodies_polygons: gpd.GeoDataFrame,
     engine: Engine,
     update_rows: bool = True,
 ):
@@ -85,27 +85,14 @@ def add_waterbodies_polygons_to_db(
 
     Parameters
     ----------
-    waterbodies_polygons_file_path : str
-        Path to the shapefile/geojson/geoparquet file containing the waterbodies polygons.
+    waterbodies_polygons : gpd.GeoDataFrame
+        The waterbodies to be added to the database.
     engine : Engine
     update_rows : bool, optional
          If True if the polygon uid already exists in the waterbodies table, the row will be
          updated else it will be skipped, by default True
 
     """
-    if not check_file_exists(path=waterbodies_polygons_file_path):
-        e = FileNotFoundError(f"File {waterbodies_polygons_file_path} does not exist!)")
-        _log.error(e)
-        raise e
-    else:
-        try:
-            waterbodies_polygons = load_vector_file(path=waterbodies_polygons_file_path).to_crs(
-                "EPSG:4326"
-            )
-        except Exception as error:
-            _log.exception(error)
-            raise error
-
     waterbodies_polygons = validate_waterbodies_polygons(waterbodies_polygons)
 
     # Ensure historical extent table exists
