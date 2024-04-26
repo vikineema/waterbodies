@@ -13,7 +13,7 @@ from waterbodies.text import get_tile_index_str_from_tuple
 
 @click.command(
     name="process-tasks",
-    help="Process a list of tasks to generate waterbody polygons.",
+    help="Process a list of tasks to generate waterbodies.",
     no_args_is_help=True,
 )
 @click.option("-v", "--verbose", default=1, count=True)
