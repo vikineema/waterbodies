@@ -8,7 +8,7 @@ WaterbodyBase = declarative_base()
 
 
 class WaterbodyHistoricalExtent(WaterbodyBase):
-    __tablename__ = "waterbodies_historical_extent"
+    __tablename__ = "waterbodies_historical_extent_test"
 
     uid: Mapped[str] = Column(String, primary_key=True)
     wb_id: Mapped[int] = Column(Integer)
