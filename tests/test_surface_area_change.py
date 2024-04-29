@@ -7,7 +7,7 @@ import pytest
 from click.testing import CliRunner
 
 from waterbodies.cli.surface_area_change.generate_tasks import generate_tasks
-from waterbodies.cli.surface_area_change.process_task import process_tasks
+from waterbodies.cli.surface_area_change.process_tasks import process_tasks
 
 _log = logging.getLogger(__name__)
 
