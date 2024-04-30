@@ -72,6 +72,11 @@ def process_tasks(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
+    dc = Datacube(app="GeneratePolygons")
+
+    min_polygon_size = 6
+    max_polygon_size = 1000
+
     if not check_directory_exists(path=goas_rasters_directory):
         e = FileNotFoundError(f"Directory {goas_rasters_directory} does not exist!")
         _log.error(e)
@@ -93,8 +98,6 @@ def process_tasks(
         fs = get_filesystem(output_directory)
         fs.mkdirs(output_directory)
         _log.info(f"Created the directory {output_directory}")
-
-    dc = Datacube(app="GeneratePolygons")
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
@@ -121,6 +124,8 @@ def process_tasks(
                     detection_threshold=detection_threshold,
                     extent_threshold=extent_threshold,
                     min_valid_observations=min_valid_observations,
+                    min_polygon_size=min_polygon_size,
+                    max_polygon_size=max_polygon_size,
                 )
                 if waterbody_polygons.empty:
                     _log.info(f"Task {task_id_str} has no waterbody polygons")
