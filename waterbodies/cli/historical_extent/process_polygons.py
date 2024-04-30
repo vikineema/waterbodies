@@ -33,6 +33,8 @@ def process_polygons(verbose, polygons_directory):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
+    dc = Datacube(app="ProcessWaterbodies")
+
     files = find_parquet_files(polygons_directory)
     _log.info(f"Found {len(files)} files containing waterbodies.")
 
@@ -47,7 +49,6 @@ def process_polygons(verbose, polygons_directory):
     _log.info(f"Loaded {len(waterbodies)} waterbodies.")
 
     # Get all the tiles used to generate the waterbodies.
-    dc = Datacube(app="ProcessWaterbodies")
     datasets = dc.find_datasets(product="wofs_ls_summary_alltime")
     tasks = create_tasks_from_datasets(
         datasets=datasets, tile_index_filter=None, bin_solar_day=False
