@@ -29,27 +29,6 @@ from waterbodies.text import get_tile_index_str_from_tuple
     help="Path to the directory containing the Global Oceans and Seas version 1 rasters files.",
 )
 @click.option(
-    "--detecton-threshold",
-    type=float,
-    default=0.1,
-    help="Threshold used to set the location of the waterbody polygons.",
-)
-@click.option(
-    "--extent-threshold",
-    type=float,
-    default=0.05,
-    help="Threshold used to set the shape/extent of the waterbody polygons.",
-)
-@click.option(
-    "--min-valid-observations",
-    type=int,
-    default=60,
-    help=(
-        "Threshold to use to mask out pixels based on the "
-        "number of valid WOfS observations for each pixel."
-    ),
-)
-@click.option(
     "--output-directory",
     type=str,
     help="Directory to write the waterbody polygons generated.",
@@ -63,9 +42,6 @@ def process_tasks(
     verbose,
     tasks_list_file,
     goas_rasters_directory,
-    detection_threshold,
-    extent_threshold,
-    min_valid_observations,
     output_directory,
     overwrite,
 ):
@@ -76,6 +52,9 @@ def process_tasks(
 
     min_polygon_size = 6
     max_polygon_size = 1000
+    detection_threshold = 0.1
+    extent_threshold = 0.05
+    min_valid_observations = 60
 
     if not check_directory_exists(path=goas_rasters_directory):
         e = FileNotFoundError(f"Directory {goas_rasters_directory} does not exist!")
