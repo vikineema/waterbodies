@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from itertools import chain
 
 import click
 from datacube import Datacube
@@ -28,7 +29,7 @@ from waterbodies.text import get_tile_index_str_from_tuple
     help="Path to the directory containing the Global Oceans and Seas version 1 rasters files.",
 )
 @click.option(
-    "--location-threshold",
+    "--detecton-threshold",
     type=float,
     default=0.1,
     help="Threshold used to set the location of the waterbody polygons.",
@@ -62,7 +63,7 @@ def process_tasks(
     verbose,
     tasks_list_file,
     goas_rasters_directory,
-    location_threshold,
+    detection_threshold,
     extent_threshold,
     min_valid_observations,
     output_directory,
@@ -81,6 +82,12 @@ def process_tasks(
         content = file.read()
         decoded_content = content.decode()
         tasks = json.loads(decoded_content)
+
+    # In case file contains list of lists
+    if all(isinstance(item, list) for item in tasks):
+        tasks = list(chain(*tasks))
+    else:
+        pass
 
     if not check_directory_exists(path=output_directory):
         fs = get_filesystem(output_directory)
@@ -111,7 +118,7 @@ def process_tasks(
                     task_datasets_ids=task_datasets_ids,
                     dc=dc,
                     goas_rasters_directory=goas_rasters_directory,
-                    location_threshold=location_threshold,
+                    detection_threshold=detection_threshold,
                     extent_threshold=extent_threshold,
                     min_valid_observations=min_valid_observations,
                 )

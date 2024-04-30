@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from itertools import chain
 
 import click
 from datacube import Datacube
@@ -76,6 +77,12 @@ def process_tasks(
         content = file.read()
         decoded_content = content.decode()
         tasks = json.loads(decoded_content)
+
+    # In case file contains list of lists
+    if all(isinstance(item, list) for item in tasks):
+        tasks = list(chain(*tasks))
+    else:
+        pass
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
