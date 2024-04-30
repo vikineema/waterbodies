@@ -400,6 +400,8 @@ python-dateutil==2.9.0.post0
     #   pystac-client
 python-dotenv==1.0.1
     # via waterbodies (pyproject.toml)
+python-geohash==0.8.5
+    # via waterbodies (pyproject.toml)
 python-rapidjson==1.16
     # via eodatasets3
 pytz==2024.1

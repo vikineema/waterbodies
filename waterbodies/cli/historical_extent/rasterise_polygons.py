@@ -5,21 +5,21 @@ import os
 import click
 import geopandas as gpd
 import rioxarray  # noqa F401
-from odc.geo.geom import Geometry
+from datacube import Datacube
 from odc.geo.xr import wrap_xr
 from rasterio.features import rasterize
 from tqdm import tqdm
 
+from waterbodies.db import get_waterbodies_engine
 from waterbodies.grid import WaterbodiesGrid
-from waterbodies.historical_extent import validate_waterbodies_polygons
-from waterbodies.io import (
-    check_directory_exists,
-    get_filesystem,
-    is_s3_path,
-    load_vector_file,
+from waterbodies.historical_extent import (
+    load_waterbodies_from_db,
+    validate_waterbodies_polygons,
 )
+from waterbodies.hopper import create_tasks_from_datasets
+from waterbodies.io import check_directory_exists, get_filesystem, is_s3_path
 from waterbodies.logs import logging_setup
-from waterbodies.text import get_tile_id_str_from_tuple
+from waterbodies.text import get_tile_index_str_from_tuple
 
 
 @click.command(
@@ -33,15 +33,9 @@ from waterbodies.text import get_tile_id_str_from_tuple
     type=str,
     help="Path of the directory to write the historical extent raster files to .",
 )
-@click.option(
-    "--historical-extent-vector-file",
-    type=str,
-    help="Path to the historical extent polygons vector file.",
-)
 def rasterise_polygons(
     verbose,
     historical_extent_rasters_directory,
-    historical_extent_vector_file,
 ):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
@@ -59,16 +53,20 @@ def rasterise_polygons(
 
     gridspec = WaterbodiesGrid().gridspec
 
-    product_footprint = gpd.read_file(
-        "https://explorer.digitalearth.africa/api/footprint/wofs_ls_summary_alltime"
-    ).to_crs(gridspec.crs)
-    product_footprint_geopolygon = Geometry(
-        geom=product_footprint.geometry.iloc[0], crs=gridspec.crs
+    # Get all the tiles used to generate the waterbodies.
+    dc = Datacube(app="RasteriseWaterbodies")
+    datasets = dc.find_datasets(product="wofs_ls_summary_alltime")
+    tasks = create_tasks_from_datasets(
+        datasets=datasets, tile_index_filter=None, bin_solar_day=False
     )
-    tiles = gridspec.tiles_from_geopolygon(geopolygon=product_footprint_geopolygon)
-    tiles = list(tiles)
+    tile_indices = [k for task in tasks for k, v in task.items()]
+    tiles = [
+        (tile_index, gridspec.tile_geobox(tile_index=tile_index)) for tile_index in tile_indices
+    ]
 
-    historical_extent_polygons = load_vector_file(path=historical_extent_vector_file)
+    # Load the historical extent polygons.
+    engine = get_waterbodies_engine()
+    historical_extent_polygons = load_waterbodies_from_db(engine=engine)
     historical_extent_polygons = validate_waterbodies_polygons(
         waterbodies_polygons=historical_extent_polygons
     )
@@ -79,7 +77,7 @@ def rasterise_polygons(
         iterable=tiles, desc="Rasterise historical extent polygons by grid tile", total=len(tiles)
     ) as tiles:
         for tile in tiles:
-            tile_id, tile_geobox = tile
+            tile_index, tile_geobox = tile
 
             # Get the historical extent polygons that intersect with the extent of the tile's
             # Geobox.
@@ -113,6 +111,6 @@ def rasterise_polygons(
                 # Write the raster to file.
                 raster_path = os.path.join(
                     historical_extent_rasters_directory,
-                    f"{get_tile_id_str_from_tuple(tile_id)}.tif",
+                    f"{get_tile_index_str_from_tuple(tile_index)}.tif",
                 )
                 tile_raster_ds.rio.to_raster(raster_path=raster_path, tags=tags, compute=True)

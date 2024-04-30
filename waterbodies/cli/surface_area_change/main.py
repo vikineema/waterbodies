@@ -1,7 +1,7 @@
 import click
 
 from waterbodies.cli.surface_area_change.generate_tasks import generate_tasks
-from waterbodies.cli.surface_area_change.process_task import process_tasks
+from waterbodies.cli.surface_area_change.process_tasks import process_tasks
 
 
 @click.group(name="surface-area-change", help="Run the waterbodies surface area change tools.")

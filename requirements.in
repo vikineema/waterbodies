@@ -13,6 +13,7 @@ odc-geo
 odc-stats
 pandas
 python-dotenv
+python-geohash
 rasterio
 rioxarray
 s3fs

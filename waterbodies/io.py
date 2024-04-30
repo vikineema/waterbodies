@@ -91,3 +91,27 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
         geotiff_file_paths = [f"s3://{file}" for file in geotiff_file_paths]
 
     return geotiff_file_paths
+
+
+def find_parquet_files(directory_path: str, file_name_pattern: str = ".*") -> list[str]:
+
+    file_name_pattern = re.compile(file_name_pattern)
+
+    fs = get_filesystem(path=directory_path)
+
+    parquet_file_paths = []
+
+    for root, dirs, files in fs.walk(directory_path):
+        for file_name in files:
+            if is_parquet(path=file_name):
+                if re.search(file_name_pattern, file_name):
+                    parquet_file_paths.append(os.path.join(root, file_name))
+                else:
+                    continue
+            else:
+                continue
+
+    if is_s3_path(path=directory_path):
+        parquet_file_paths = [f"s3://{file}" for file in parquet_file_paths]
+
+    return parquet_file_paths

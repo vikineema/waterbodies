@@ -12,7 +12,7 @@ from odc.stats.model import DateTimeRange
 from waterbodies.hopper import create_tasks_from_datasets
 from waterbodies.io import check_directory_exists, find_geotiff_files, get_filesystem
 from waterbodies.logs import logging_setup
-from waterbodies.text import format_task, get_tile_id_tuple_from_filename
+from waterbodies.text import format_task, get_tile_index_tuple_from_filename
 
 
 @click.command(name="generate-tasks", help="Generate tasks to run.", no_args_is_help=True)
@@ -68,7 +68,7 @@ def generate_tasks(
         )
 
     tiles_containing_waterbodies = [
-        get_tile_id_tuple_from_filename(file_path=raster_file)
+        get_tile_index_tuple_from_filename(file_path=raster_file)
         for raster_file in historical_extent_rasters
     ]
 
@@ -85,7 +85,7 @@ def generate_tasks(
         datasets = dc.find_datasets(**dc_query)
         _log.info(f"Found {len(datasets)} datasets matching the query {dc_query}")
         tasks = create_tasks_from_datasets(
-            datasets=datasets, tile_ids_of_interest=tiles_containing_waterbodies
+            datasets=datasets, tile_index_filter=tiles_containing_waterbodies, bin_solar_day=True
         )
 
     elif run_type == "gap-filling":
@@ -108,7 +108,9 @@ def generate_tasks(
         _log.info(f"Found {len(datasets_)} datasets matching the query {dc_query_}")
 
         tasks_ = create_tasks_from_datasets(
-            datasets=datasets_, tile_ids_of_interest=tiles_containing_waterbodies
+            datasets=datasets_,
+            tile_index_filter=tiles_containing_waterbodies,
+            bin_solar_day=True,
         )
 
         # Update each task with the datasets whose acquisition time matches
@@ -125,11 +127,11 @@ def generate_tasks(
             _log.info(
                 f"Updating datasets for tasks with the solar day: {solar_day}  {idx}/{len(grouped_task_ids)}"  # noqa E501
             )
-            task_tile_ids = [(task_id[1], task_id[2]) for task_id in task_ids]
+            task_ids_tile_indices = [(task_id[1], task_id[2]) for task_id in task_ids]
             dc_query = dict(product=product, time=(solar_day))
             datasets = dc.find_datasets(**dc_query)
             updated_tasks = create_tasks_from_datasets(
-                datasets=datasets, tile_ids_of_interest=task_tile_ids
+                datasets=datasets, tile_index_filter=task_ids_tile_indices, bin_solar_day=True
             )
             tasks.extend(updated_tasks)
             idx += 1

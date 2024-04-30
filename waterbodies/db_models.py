@@ -8,14 +8,13 @@ WaterbodyBase = declarative_base()
 
 
 class WaterbodyHistoricalExtent(WaterbodyBase):
-    __tablename__ = "waterbodies_historical_extent"
+    __tablename__ = "waterbodies_historical_extent_test"
 
     uid: Mapped[str] = Column(String, primary_key=True)
     wb_id: Mapped[int] = Column(Integer)
     area_m2: Mapped[float] = Column(Float)
     length_m: Mapped[float] = Column(Float)
     perim_m: Mapped[float] = Column(Float)
-    timeseries: Mapped[str] = Column(String)
     geometry = Column(Geometry(geometry_type="POLYGON"))
 
     def __repr__(self) -> str:
@@ -26,7 +25,9 @@ class WaterbodyObservation(WaterbodyBase):
     __tablename__ = "waterbodies_observations_test"
 
     obs_id: Mapped[str] = Column(String, primary_key=True)
-    uid: Mapped[str] = Column(String, ForeignKey("waterbodies_historical_extent.uid"), index=True)
+    uid: Mapped[str] = Column(
+        String, ForeignKey("waterbodies_historical_extent_test.uid"), index=True
+    )
     px_total: Mapped[int] = Column(Integer)
     px_wet: Mapped[int] = Column(Integer)
     area_wet_m2: Mapped[float] = Column(Float)
@@ -34,8 +35,8 @@ class WaterbodyObservation(WaterbodyBase):
     area_dry_m2: Mapped[float] = Column(Float)
     px_invalid: Mapped[int] = Column(Integer)
     area_invalid_m2: Mapped[float] = Column(Float)
-    date: Mapped[datetime] = Column(Date)
-    task_id: Mapped[str] = Column(String)
+    date: Mapped[datetime] = Column(Date, index=True)
+    task_id: Mapped[str] = Column(String, index=True)
 
     def __repr__(self) -> str:
         return (
