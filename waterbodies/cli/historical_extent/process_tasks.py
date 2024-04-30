@@ -48,7 +48,7 @@ def process_tasks(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    dc = Datacube(app="GeneratePolygons")
+    dc = Datacube(app="process-tasks")
 
     min_polygon_size = 6
     max_polygon_size = 1000

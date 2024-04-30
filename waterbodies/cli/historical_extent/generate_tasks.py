@@ -29,7 +29,7 @@ def generate_tasks(
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    dc = Datacube(app="GeneratePolygons")
+    dc = Datacube(app="generate-tasks")
 
     # Find all the WOfS All Time Summaries datasets
     dc_query = dict(product="wofs_ls_summary_alltime")

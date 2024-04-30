@@ -33,7 +33,7 @@ def process_polygons(verbose, polygons_directory):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
-    dc = Datacube(app="ProcessWaterbodies")
+    dc = Datacube(app="process-polygons")
 
     files = find_parquet_files(polygons_directory)
     _log.info(f"Found {len(files)} files containing waterbodies.")
