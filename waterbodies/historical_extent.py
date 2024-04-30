@@ -2,6 +2,7 @@ import logging
 
 import geopandas as gpd
 import numpy as np
+import xarray as xr
 from datacube import Datacube
 from rasterio.features import shapes
 from scipy.ndimage import distance_transform_edt
@@ -180,44 +181,48 @@ def load_waterbodies_from_db(engine: Engine) -> gpd.GeoDataFrame:
     return waterbodies
 
 
-def get_waterbodies(
+def load_wofs_frequency(
     tile_index_x: int,
     tile_index_y: int,
     task_datasets_ids: list[str],
     dc: Datacube,
     goas_rasters_directory: str,
-    location_threshold: float = 0.1,
+    detection_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
-) -> gpd.GeoDataFrame:
+) -> tuple[xr.DataArray, xr.DataArray]:
     """
-    Generate the waterbody polygons for a given task.
+    Load the WOfS All-Time Summary frequency measurement for a tile and threshold the data
+    using the extent and the detection thresholds.
 
     Parameters
     ----------
     tile_index_x : int
-        X tile index of the task.
+        X value of the tile index of the tile to generate waterbody polygons for.
     tile_index_y : int
-        Y tile index of the task.
+        Y value of the tile index of the tile to generate waterbody polygons for.
     task_datasets_ids : list[str]
-        IDs of the datasets for the task.
+        UUID(s) of the WOfS All Time Summary dataset(s) that cover the tile to generate
+        waterbody polygons for.
     dc : Datacube
         Datacube connection
     goas_rasters_directory : str
         Directory containing the Global Oceans and Seas version 1 rasters.
-    location_threshold : float, optional
-        Threshold used to set the location of the waterbody polygons, by default 0.1
+    detection_threshold : float, optional
+        Threshold to use to set the location of the waterbody polygons, by default 0.1
     extent_threshold : float, optional
-        Threshold used to set the shape/extent of the waterbody polygons, by default 0.05
+        Threshold to use to set the shape/extent of the waterbody polygons, by default 0.05
     min_valid_observations : int, optional
         Threshold to use to mask out pixels based on the number of valid WOfS
         observations for each pixel, by default 60
 
     Returns
     -------
-    gpd.GeoDataFrame
-        Waterbody polygons for the task.
+    tuple[xr.DataArray, xr.DataArray]
+        WOfS All Time Summary frequency measurement thresholded using the detection threshold
+        WOfS All Time Summary frequency measurement thresholded using the extent threshold
     """
+
     tile_index = (tile_index_x, tile_index_y)
     tile_index_str = get_tile_index_str_from_tuple(tile_index)
     gridspec = WaterbodiesGrid().gridspec
@@ -225,99 +230,283 @@ def get_waterbodies(
 
     task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
 
-    goas_raster_file = find_geotiff_files(
-        directory_path=goas_rasters_directory, file_name_pattern=tile_index_str
-    )
-    if goas_raster_file:
-        # Load the global oceans and seas raster for the tile.
-        # Convert the oceans/seas pixels from 1 to 0 and the land pixels from 0 to 1.
-        land_sea_mask = np.logical_not(
-            rio_slurp_xarray(fname=goas_raster_file[0], gbox=tile_geobox)
-        ).astype(int)
-        # Erode the land pixels by 500 m
-        eroded_land_sea_mask = binary_erosion(
-            image=land_sea_mask.values,
-            footprint=disk(radius=500 / abs(land_sea_mask.geobox.resolution[0])),
-        )
-    else:
-        e = FileNotFoundError(
-            f"Tile {tile_index_str} does not have a Global Oceans and Seas "
-            f"raster in the directory {goas_rasters_directory}"
-        )
-        _log.error(e)
-        raise e
-
     # Note: It is expected that for the wofs_ls_summary_alltime product
     # there is one time step for each tile, however in case of
     # multiple, pick the most recent time.
-    ds = (
-        dc.load(datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox)
-        .isel(time=-1)
-        .where(eroded_land_sea_mask)
-    )
+    ds = dc.load(
+        datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
+    ).isel(time=-1)
 
+    if not goas_rasters_directory:
+        _log.info(f"Skip masking ocean pixels for tile {tile_index_str}")
+    else:
+        goas_raster_file = find_geotiff_files(
+            directory_path=goas_rasters_directory, file_name_pattern=tile_index_str
+        )
+        if goas_raster_file:
+            # Load the global oceans and seas raster for the tile.
+            # Convert the oceans/seas pixels from 1 to 0 and the land pixels from 0 to 1.
+            land_sea_mask = np.logical_not(
+                rio_slurp_xarray(fname=goas_raster_file[0], gbox=tile_geobox)
+            ).astype(int)
+            # Erode the land pixels by 500 m
+            eroded_land_sea_mask = binary_erosion(
+                image=land_sea_mask.values,
+                footprint=disk(radius=500 / abs(land_sea_mask.geobox.resolution[0])),
+            )
+            # Mask the WOfS data using the land sea mask
+            ds = ds.where(eroded_land_sea_mask)
+        else:
+            e = FileNotFoundError(
+                f"Tile {tile_index_str} does not have a Global Oceans and Seas "
+                f"raster in the directory {goas_rasters_directory}"
+            )
+            _log.error(e)
+            raise e
+
+    # Threshold using the extent and detection thresholds.
     ds["count_clear"] = ds["count_clear"].where(ds["count_clear"] != -999)
     valid_clear_count = ds["count_clear"] >= min_valid_observations
-
-    valid_location = np.logical_and(ds["frequency"] > location_threshold, valid_clear_count).astype(
-        int
-    )
+    valid_detection = np.logical_and(
+        ds["frequency"] > detection_threshold, valid_clear_count
+    ).astype(int)
     valid_extent = np.logical_and(ds["frequency"] > extent_threshold, valid_clear_count).astype(int)
+    return valid_detection, valid_extent
 
-    # Label connected regions in the valid_extent DataArray
-    # each region is considered a waterbody.
-    labelled_waterbodies = label(label_image=valid_extent.values, background=0)
-    # Remove waterbodies smaller than 5 pixels.
-    labelled_waterbodies = remove_small_objects(labelled_waterbodies, min_size=5, connectivity=1)
 
-    # Identify waterbodies larger than 1000 pixels.
+def remove_small_waterbodies(waterbodies_raster: np.ndarray, min_size: int) -> np.ndarray:
+    """
+    Label connected regions in the `waterbodies_raster` array and remove waterbodies (regions)
+    smaller than the specified number of pixels.
+    Parameters
+    ----------
+    waterbodies_raster : np.ndarray
+        Raster image to filter.
+    min_size : int
+        The smallest allowable waterbody size i.e. minimum number of pixels a waterbody must have.
+
+    Returns
+    -------
+    np.ndarray
+        Labelled raster image with the waterbodies (regoins) smaller than specified number
+        of pixels removed.
+    """
+    labelled_waterbodies_raster = label(label_image=waterbodies_raster, background=0)
+    labelled_waterbodies_raster = remove_small_objects(
+        labelled_waterbodies_raster, min_size=min_size, connectivity=1
+    )
+    return labelled_waterbodies_raster
+
+
+def select_large_waterbodies(labelled_waterbodies_raster: np.ndarray, min_size: int) -> np.ndarray:
+    """
+    Identify waterbodies (regions) larger than the specified number of pixels and create a binary
+    mask of the large waterbodies.
+
+    Parameters
+    ----------
+    labelled_waterbodies_raster : np.ndarray
+        Labelled raster image to filter.
+    min_size : int
+        Minimum number of pixels to classify a waterbody as large.
+
+    Returns
+    -------
+    np.ndarray
+        Binary mask of the large waterbodies.
+    """
     large_waterbodies_labels = [
         region.label
-        for region in regionprops(label_image=labelled_waterbodies)
+        for region in regionprops(label_image=labelled_waterbodies_raster)
         if region.num_pixels > 1000
     ]
-    # Create a binary mask of the large waterbodies
-    large_waterbodies_mask = np.where(np.isin(labelled_waterbodies, large_waterbodies_labels), 1, 0)
-    # Remove the large waterbodies from the labelled image.
-    labelled_waterbodies = np.where(large_waterbodies_mask == 1, 0, labelled_waterbodies)
-    # Erode the location threshold pixels by 1.
-    valid_location_eroded = erosion(image=valid_location.values, footprint=disk(radius=1))
-    # Create the watershed segmentation markers by labelling the eroded image.
-    watershed_segmentation_markers = label(label_image=valid_location_eroded, background=0)
-    # Remove markers smaller than 100 pixels.
-    watershed_segmentation_markers = remove_small_objects(
-        watershed_segmentation_markers, min_size=100, connectivity=1
-    )
-    # Segment the large waterbodies using watershed segmentation
-    segmented_large_waterbodies = watershed(
-        image=-distance_transform_edt(large_waterbodies_mask),
-        markers=watershed_segmentation_markers,
-        mask=large_waterbodies_mask,
-    )
-    # Add the segmented large waterbodies.
-    labelled_waterbodies = np.where(
-        large_waterbodies_mask == 1, segmented_large_waterbodies, labelled_waterbodies
+
+    large_waterbodies_mask = np.where(
+        np.isin(labelled_waterbodies_raster, large_waterbodies_labels), 1, 0
     )
 
-    # Only keep waterbodies that contain a waterbody pixel from the valid_location DataArray.
-    def waterbody_pixel_count(regionmask, intensity_image):
+    return large_waterbodies_mask
+
+
+def generate_watershed_segmentation_markers(
+    marker_source: np.ndarray, erosion_radius: int, min_size: int
+) -> np.ndarray:
+    """
+    Create watershed segmentation markers by eroding the marker source pixels
+    and labelling the resulting image.
+
+    Parameters
+    ----------
+    marker_source : np.ndarray
+        Raster image to generate watershed segmentation markers from.
+    erosion_radius : int
+        Radius to use to generate footprint for erosion.
+    min_size : int
+        The smallest allowable marker size.
+
+    Returns
+    -------
+    np.ndarray
+        Watershed segmentation markers.
+    """
+    eroded_marker_source = erosion(image=marker_source, footprint=disk(radius=erosion_radius))
+    watershed_segmentation_markers = label(label_image=eroded_marker_source, background=0)
+    watershed_segmentation_markers = remove_small_objects(
+        watershed_segmentation_markers, min_size=min_size, connectivity=1
+    )
+    return watershed_segmentation_markers
+
+
+def segment_waterbodies(
+    waterbodies_to_segment: np.ndarray, segmentation_markers: np.ndarray
+) -> np.ndarray:
+    """
+    Segment waterbodies.
+
+    Parameters
+    ----------
+    waterbodies_to_segment : np.ndarray
+        Raster image containing the waterbodies to be segmented.
+    segmentation_markers : np.ndarray
+        Raster image containing the watershed segmentation markers.
+
+    Returns
+    -------
+    np.ndarray
+        Raster image with the waterbodies segmented.
+    """
+    segmented_waterbodies = watershed(
+        image=-distance_transform_edt(waterbodies_to_segment),
+        markers=segmentation_markers,
+        mask=waterbodies_to_segment,
+    )
+    return segmented_waterbodies
+
+
+def confirm_extent_contains_detection(
+    extent_waterbodies: np.ndarray, detection_np: np.ndarray
+) -> np.ndarray:
+    """
+    Filter the waterbodies in the extent raster to keep only waterbodies that contain a
+    waterbody pixel from the detection raster.
+
+    Parameters
+    ----------
+    extent_waterbodies : np.ndarray
+        Raster of the extent of the waterbodies.
+    detection_np : np.ndarray
+        Raster of the location of the waterbodies.
+
+    Returns
+    -------
+    np.ndarray
+        Filtered waterbodies in the extent raster.
+    """
+
+    def detection_pixel_count(regionmask, intensity_image):
         return np.sum(intensity_image[regionmask])
 
     valid_waterbodies_labels = [
         region.label
         for region in regionprops(
-            label_image=labelled_waterbodies,
-            intensity_image=valid_location.values,
-            extra_properties=[waterbody_pixel_count],
+            label_image=extent_waterbodies,
+            intensity_image=detection_np,
+            extra_properties=[detection_pixel_count],
         )
-        if region.waterbody_pixel_count > 0
+        if region.detection_pixel_count > 0
     ]
     valid_waterbodies = np.where(
-        np.isin(labelled_waterbodies, valid_waterbodies_labels), labelled_waterbodies, 0
+        np.isin(extent_waterbodies, valid_waterbodies_labels), extent_waterbodies, 0
     )
+    return valid_waterbodies
+
+
+def get_waterbodies(
+    tile_index_x: int,
+    tile_index_y: int,
+    task_datasets_ids: list[str],
+    dc: Datacube,
+    goas_rasters_directory: str,
+    detection_threshold: float = 0.1,
+    extent_threshold: float = 0.05,
+    min_valid_observations: int = 60,
+) -> gpd.GeoDataFrame:
+    """
+    Generate the waterbody polygons for a given tile.
+
+    Parameters
+    ----------
+    tile_index_x : int
+        X value of the tile index of the tile to generate waterbody polygons for.
+    tile_index_y : int
+        Y value of the tile index of the tile to generate waterbody polygons for.
+    task_datasets_ids : list[str]
+        UUID(s) of the WOfS All Time Summary dataset(s) that cover the tile to generate
+        waterbody polygons for.
+    dc : Datacube
+        Datacube connection
+    goas_rasters_directory : str
+        Directory containing the Global Oceans and Seas version 1 rasters.
+    detection_threshold : float, optional
+        Threshold to use to set the location of the waterbody polygons, by default 0.1
+    extent_threshold : float, optional
+        Threshold to use to set the shape/extent of the waterbody polygons, by default 0.05
+    min_valid_observations : int, optional
+        Threshold to use to mask out pixels based on the number of valid WOfS
+        observations for each pixel, by default 60
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Waterbody polygons for the tile.
+    """
+    detection_da, extent_da = load_wofs_frequency(
+        tile_index_x=tile_index_x,
+        tile_index_y=tile_index_y,
+        task_datasets_ids=task_datasets_ids,
+        dc=dc,
+        goas_rasters_directory=goas_rasters_directory,
+        detection_threshold=detection_threshold,
+        extent_threshold=extent_threshold,
+        min_valid_observations=min_valid_observations,
+    )
+
+    extent_waterbodies = remove_small_waterbodies(waterbodies_raster=extent_da.values, min_size=6)
+
+    extent_large_waterbodies_mask = select_large_waterbodies(
+        labelled_waterbodies_raster=extent_waterbodies, min_size=1000
+    )
+
+    # Remove the large waterbodies from the labelled image.
+    extent_waterbodies = np.where(extent_large_waterbodies_mask == 1, 0, extent_waterbodies)
+
+    watershed_segmentation_markers = generate_watershed_segmentation_markers(
+        marker_source=detection_da.values, erosion_radius=1, min_size=100
+    )
+
+    # Segment the large waterbodies using watershed segmentation
+    segmented_extent_large_waterbodies = segment_waterbodies(
+        waterbodies_to_segment=extent_large_waterbodies_mask,
+        segmentation_markers=watershed_segmentation_markers,
+    )
+
+    # Add the segmented large waterbodies.
+    extent_waterbodies = np.where(
+        segmented_extent_large_waterbodies > 0,
+        segmented_extent_large_waterbodies,
+        extent_waterbodies,
+    )
+
+    valid_waterbodies = confirm_extent_contains_detection(
+        extent_waterbodies=extent_waterbodies, detection_np=detection_da.values
+    )
+
     # Relabel the waterbodies and remove waterbodies smaller than 6 pixels.
-    valid_waterbodies = label(label_image=valid_waterbodies, background=0)
-    valid_waterbodies = remove_small_objects(valid_waterbodies, min_size=6, connectivity=1)
+    valid_waterbodies = remove_small_waterbodies(waterbodies_raster=valid_waterbodies, min_size=6)
+
+    tile_index = (tile_index_x, tile_index_y)
+    gridspec = WaterbodiesGrid().gridspec
+    tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
 
     # Vectorize the waterbodies.
     polygon_value_pairs = list(
