@@ -113,6 +113,7 @@ def process_polygons(verbose, polygons_directory):
     waterbodies.reset_index(inplace=True, drop=True)
     waterbodies["WB_ID"] = waterbodies.index + 1
     assert waterbodies["WB_ID"].min() > 0
+    _log.info(f"Final waterbodies count: {len(waterbodies)}")
 
     # Write the polygons to the database.
     engine = get_waterbodies_engine()
