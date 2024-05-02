@@ -8,7 +8,7 @@ WaterbodyBase = declarative_base()
 
 
 class WaterbodyHistoricalExtent(WaterbodyBase):
-    __tablename__ = "waterbodies_historical_extent_test"
+    __tablename__ = "waterbodies_historical_extent"
 
     uid: Mapped[str] = Column(String, primary_key=True)
     wb_id: Mapped[int] = Column(Integer)
@@ -22,12 +22,10 @@ class WaterbodyHistoricalExtent(WaterbodyBase):
 
 
 class WaterbodyObservation(WaterbodyBase):
-    __tablename__ = "waterbodies_observations_test"
+    __tablename__ = "waterbodies_observations"
 
-    obs_id: Mapped[str] = Column(String, primary_key=True)
-    uid: Mapped[str] = Column(
-        String, ForeignKey("waterbodies_historical_extent_test.uid"), index=True
-    )
+    obs_id: Mapped[str] = Column(String, primary_key=True, index=True)
+    uid: Mapped[str] = Column(String, ForeignKey("waterbodies_historical_extent.uid"), index=True)
     px_total: Mapped[int] = Column(Integer)
     px_wet: Mapped[int] = Column(Integer)
     area_wet_m2: Mapped[float] = Column(Float)
