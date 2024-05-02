@@ -318,7 +318,7 @@ def select_large_waterbodies(labelled_waterbodies_raster: np.ndarray, min_size: 
     large_waterbodies_labels = [
         region.label
         for region in regionprops(label_image=labelled_waterbodies_raster)
-        if region.num_pixels > 1000
+        if region.num_pixels > min_size
     ]
 
     large_waterbodies_mask = np.where(
@@ -430,6 +430,8 @@ def get_waterbodies(
     detection_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
+    min_polygon_size: int = 6,
+    max_polygon_size: int = 1000,
 ) -> gpd.GeoDataFrame:
     """
     Generate the waterbody polygons for a given tile.
@@ -454,11 +456,16 @@ def get_waterbodies(
     min_valid_observations : int, optional
         Threshold to use to mask out pixels based on the number of valid WOfS
         observations for each pixel, by default 60
+    min_polygon_size : int, optional
+        Minimum number of pixels a waterbody must have to be included, by default 6
+    max_polygon_size : int, optional
+        Maximum number of pixels a waterbody can have. Waterbodies larger than the specified number
+        of pixels are segmentated using watershed segmentation, by default 1000
 
     Returns
     -------
     gpd.GeoDataFrame
-        Waterbody polygons for the tile.
+        Waterbody polygons for a given tile
     """
     detection_da, extent_da = load_wofs_frequency(
         tile_index_x=tile_index_x,
@@ -471,10 +478,12 @@ def get_waterbodies(
         min_valid_observations=min_valid_observations,
     )
 
-    extent_waterbodies = remove_small_waterbodies(waterbodies_raster=extent_da.values, min_size=6)
+    extent_waterbodies = remove_small_waterbodies(
+        waterbodies_raster=extent_da.values, min_size=min_polygon_size
+    )
 
     extent_large_waterbodies_mask = select_large_waterbodies(
-        labelled_waterbodies_raster=extent_waterbodies, min_size=1000
+        labelled_waterbodies_raster=extent_waterbodies, min_size=max_polygon_size
     )
 
     # Remove the large waterbodies from the labelled image.
@@ -502,7 +511,9 @@ def get_waterbodies(
     )
 
     # Relabel the waterbodies and remove waterbodies smaller than 6 pixels.
-    valid_waterbodies = remove_small_waterbodies(waterbodies_raster=valid_waterbodies, min_size=6)
+    valid_waterbodies = remove_small_waterbodies(
+        waterbodies_raster=valid_waterbodies, min_size=min_polygon_size
+    )
 
     tile_index = (tile_index_x, tile_index_y)
     gridspec = WaterbodiesGrid().gridspec

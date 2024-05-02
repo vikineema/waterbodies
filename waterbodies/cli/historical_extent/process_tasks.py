@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from itertools import chain
 
 import click
 from datacube import Datacube
@@ -28,27 +29,6 @@ from waterbodies.text import get_tile_index_str_from_tuple
     help="Path to the directory containing the Global Oceans and Seas version 1 rasters files.",
 )
 @click.option(
-    "--location-threshold",
-    type=float,
-    default=0.1,
-    help="Threshold used to set the location of the waterbody polygons.",
-)
-@click.option(
-    "--extent-threshold",
-    type=float,
-    default=0.05,
-    help="Threshold used to set the shape/extent of the waterbody polygons.",
-)
-@click.option(
-    "--min-valid-observations",
-    type=int,
-    default=60,
-    help=(
-        "Threshold to use to mask out pixels based on the "
-        "number of valid WOfS observations for each pixel."
-    ),
-)
-@click.option(
     "--output-directory",
     type=str,
     help="Directory to write the waterbody polygons generated.",
@@ -62,14 +42,19 @@ def process_tasks(
     verbose,
     tasks_list_file,
     goas_rasters_directory,
-    location_threshold,
-    extent_threshold,
-    min_valid_observations,
     output_directory,
     overwrite,
 ):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
+
+    dc = Datacube(app="process-tasks")
+
+    min_polygon_size = 6
+    max_polygon_size = 1000
+    detection_threshold = 0.1
+    extent_threshold = 0.05
+    min_valid_observations = 60
 
     if not check_directory_exists(path=goas_rasters_directory):
         e = FileNotFoundError(f"Directory {goas_rasters_directory} does not exist!")
@@ -82,12 +67,16 @@ def process_tasks(
         decoded_content = content.decode()
         tasks = json.loads(decoded_content)
 
+    # In case file contains list of lists
+    if all(isinstance(item, list) for item in tasks):
+        tasks = list(chain(*tasks))
+    else:
+        pass
+
     if not check_directory_exists(path=output_directory):
         fs = get_filesystem(output_directory)
         fs.mkdirs(output_directory)
         _log.info(f"Created the directory {output_directory}")
-
-    dc = Datacube(app="GeneratePolygons")
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
@@ -111,9 +100,11 @@ def process_tasks(
                     task_datasets_ids=task_datasets_ids,
                     dc=dc,
                     goas_rasters_directory=goas_rasters_directory,
-                    location_threshold=location_threshold,
+                    detection_threshold=detection_threshold,
                     extent_threshold=extent_threshold,
                     min_valid_observations=min_valid_observations,
+                    min_polygon_size=min_polygon_size,
+                    max_polygon_size=max_polygon_size,
                 )
                 if waterbody_polygons.empty:
                     _log.info(f"Task {task_id_str} has no waterbody polygons")
