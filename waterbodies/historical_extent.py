@@ -186,7 +186,7 @@ def load_wofs_frequency(
     tile_index_y: int,
     task_datasets_ids: list[str],
     dc: Datacube,
-    goas_rasters_directory: str,
+    land_sea_mask_rasters_directory: str,
     detection_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
@@ -206,8 +206,8 @@ def load_wofs_frequency(
         waterbody polygons for.
     dc : Datacube
         Datacube connection
-    goas_rasters_directory : str
-        Directory containing the Global Oceans and Seas version 1 rasters.
+    land_sea_mask_rasters_directory : str
+        Directory containing the rasters to use to mask ocean and sea pixels.
     detection_threshold : float, optional
         Threshold to use to set the location of the waterbody polygons, by default 0.1
     extent_threshold : float, optional
@@ -237,17 +237,17 @@ def load_wofs_frequency(
         datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
     ).isel(time=-1)
 
-    if not goas_rasters_directory:
-        _log.info(f"Skip masking ocean pixels for tile {tile_index_str}")
+    if not land_sea_mask_rasters_directory:
+        _log.info(f"Skip masking ocean and sea pixels for tile {tile_index_str}")
     else:
-        goas_raster_file = find_geotiff_files(
-            directory_path=goas_rasters_directory, file_name_pattern=tile_index_str
+        land_sea_mask_raster_file = find_geotiff_files(
+            directory_path=land_sea_mask_rasters_directory, file_name_pattern=tile_index_str
         )
-        if goas_raster_file:
+        if land_sea_mask_raster_file:
             # Load the global oceans and seas raster for the tile.
             # Convert the oceans/seas pixels from 1 to 0 and the land pixels from 0 to 1.
             land_sea_mask = np.logical_not(
-                rio_slurp_xarray(fname=goas_raster_file[0], gbox=tile_geobox)
+                rio_slurp_xarray(fname=land_sea_mask_raster_file[0], gbox=tile_geobox)
             ).astype(int)
             # Erode the land pixels by 500 m
             eroded_land_sea_mask = binary_erosion(
@@ -258,8 +258,8 @@ def load_wofs_frequency(
             ds = ds.where(eroded_land_sea_mask)
         else:
             e = FileNotFoundError(
-                f"Tile {tile_index_str} does not have a Global Oceans and Seas "
-                f"raster in the directory {goas_rasters_directory}"
+                f"Tile {tile_index_str} does not have a land/sea mask"
+                f"raster in the directory {land_sea_mask_rasters_directory}"
             )
             _log.error(e)
             raise e
@@ -426,7 +426,7 @@ def get_waterbodies(
     tile_index_y: int,
     task_datasets_ids: list[str],
     dc: Datacube,
-    goas_rasters_directory: str,
+    land_sea_mask_rasters_directory: str,
     detection_threshold: float = 0.1,
     extent_threshold: float = 0.05,
     min_valid_observations: int = 60,
@@ -447,8 +447,8 @@ def get_waterbodies(
         waterbody polygons for.
     dc : Datacube
         Datacube connection
-    goas_rasters_directory : str
-        Directory containing the Global Oceans and Seas version 1 rasters.
+    land_sea_mask_rasters_directory : str
+        Directory containing the rasters to use for masking ocean and sea pixels.
     detection_threshold : float, optional
         Threshold to use to set the location of the waterbody polygons, by default 0.1
     extent_threshold : float, optional
@@ -472,7 +472,7 @@ def get_waterbodies(
         tile_index_y=tile_index_y,
         task_datasets_ids=task_datasets_ids,
         dc=dc,
-        goas_rasters_directory=goas_rasters_directory,
+        land_sea_mask_rasters_directory=land_sea_mask_rasters_directory,
         detection_threshold=detection_threshold,
         extent_threshold=extent_threshold,
         min_valid_observations=min_valid_observations,

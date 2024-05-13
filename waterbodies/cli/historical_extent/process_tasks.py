@@ -24,9 +24,9 @@ from waterbodies.text import get_tile_index_str_from_tuple
     help="Path to the text file containing the list of tasks to process.",
 )
 @click.option(
-    "--goas-rasters-directory",
+    "--land-sea-mask-rasters-directory",
     type=str,
-    help="Path to the directory containing the Global Oceans and Seas version 1 rasters files.",
+    help="Path to the directory containing the rasters to use for masking ocean and sea pixels.",
 )
 @click.option(
     "--output-directory",
@@ -41,7 +41,7 @@ from waterbodies.text import get_tile_index_str_from_tuple
 def process_tasks(
     verbose,
     tasks_list_file,
-    goas_rasters_directory,
+    land_sea_mask_rasters_directory,
     output_directory,
     overwrite,
 ):
@@ -56,8 +56,8 @@ def process_tasks(
     extent_threshold = 0.05
     min_valid_observations = 60
 
-    if not check_directory_exists(path=goas_rasters_directory):
-        e = FileNotFoundError(f"Directory {goas_rasters_directory} does not exist!")
+    if not check_directory_exists(path=land_sea_mask_rasters_directory):
+        e = FileNotFoundError(f"Directory {land_sea_mask_rasters_directory} does not exist!")
         _log.error(e)
         raise e
 
@@ -99,7 +99,7 @@ def process_tasks(
                     tile_index_y=tile_index_y,
                     task_datasets_ids=task_datasets_ids,
                     dc=dc,
-                    goas_rasters_directory=goas_rasters_directory,
+                    land_sea_mask_rasters_directory=land_sea_mask_rasters_directory,
                     detection_threshold=detection_threshold,
                     extent_threshold=extent_threshold,
                     min_valid_observations=min_valid_observations,
