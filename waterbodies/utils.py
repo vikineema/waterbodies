@@ -6,7 +6,9 @@ from datacube.testutils.io import _fix_resampling
 from odc.geo import wh_
 from odc.geo.crs import CRS
 from odc.geo.geobox import GeoBox, zoom_to
+from odc.geo.xr import xr_coords
 from rasterio.warp import reproject
+from xarray import DataArray
 
 # Note: Functions here are adapted from the datacube.testutils.oi module because
 # of differences in behaviour between odc.geobox.GeoBox and datacube.utils.geometry.Geobox
@@ -97,9 +99,8 @@ def rio_slurp_xarray(fname, *args, rgb="auto", **kw):
     rio_slurp_read(fname, out_shape, ..)
     rio_slurp_reproject(fname, gbox, ...)
 
-    then wraps it all in xarray.DataArray with .crs,.nodata etc.
+    then wraps it all in xarray.Dafrom xarray import DataArraytaArray with .crs,.nodata etc.
     """
-    from xarray import DataArray
 
     if len(args) == 0:
         if "gbox" in kw:
@@ -120,6 +121,6 @@ def rio_slurp_xarray(fname, *args, rgb="auto", **kw):
     else:
         dims = mm.gbox.dims
 
-    return DataArray(
-        im, dims=dims, coords=mm.gbox.xr_coords(with_crs=True), attrs=dict(nodata=mm.nodata)
-    )
+    coords = xr_coords(mm.gbox, crs_coord_name="spatial_ref")
+
+    return DataArray(im, dims=dims, coords=coords, attrs=dict(nodata=mm.nodata))
