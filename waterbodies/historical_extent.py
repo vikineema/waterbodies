@@ -235,7 +235,7 @@ def load_wofs_frequency(
     # multiple, pick the most recent time.
     ds = dc.load(
         datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
-    ).isel(time=-1)
+    ).isel(time=0)
 
     if not land_sea_mask_rasters_directory:
         _log.info(f"Skip masking ocean and sea pixels for tile {tile_index_str}")
