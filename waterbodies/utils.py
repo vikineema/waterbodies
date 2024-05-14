@@ -1,7 +1,6 @@
 from datacube.testutils.io import rio_slurp_xarray as dc_rio_slurp_xarray
 from datacube.utils.geometry import GeoBox as dc_Geobox
 from odc.geo.geobox import GeoBox
-from odc.geo.xr import wrap_xr  # noqa F401
 
 
 # Wrapper around datacube rio_slurp_xarray
@@ -25,5 +24,5 @@ def rio_slurp_xarray(fname, *args, rgb="auto", **kw):
             args[0] = dc_Geobox(
                 width=gbox.width, height=gbox.height, affine=gbox.affine, crs=gbox.crs
             )
-
-    return dc_rio_slurp_xarray(fname, *args, rgb=rgb, **kw)
+    da = dc_rio_slurp_xarray(fname, *args, rgb=rgb, **kw)
+    return da
