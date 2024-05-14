@@ -244,11 +244,10 @@ def load_wofs_frequency(
             directory_path=land_sea_mask_rasters_directory, file_name_pattern=tile_index_str
         )
         if land_sea_mask_raster_file:
-            # Load the global oceans and seas raster for the tile.
-            # Convert the oceans/seas pixels from 1 to 0 and the land pixels from 0 to 1.
-            land_sea_mask = np.logical_not(
-                rio_slurp_xarray(fname=land_sea_mask_raster_file[0], gbox=tile_geobox)
-            ).astype(int)
+            # Load the land/sea mask raster for the tile.
+            # Note: in the land/sea mask raster oceans/seas pixels must have a value of 0
+            # and the land pixels a value of 1.
+            land_sea_mask = rio_slurp_xarray(fname=land_sea_mask_raster_file[0], gbox=tile_geobox)
             # Erode the land pixels by 500 m
             eroded_land_sea_mask = binary_erosion(
                 image=land_sea_mask.values,
