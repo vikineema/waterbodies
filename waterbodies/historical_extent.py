@@ -225,20 +225,19 @@ def load_wofs_frequency(
 
     tile_index = (tile_index_x, tile_index_y)
     tile_index_str = get_tile_index_str_from_tuple(tile_index)
-    gridspec = WaterbodiesGrid().gridspec
-    tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
-
     task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
 
-    # Note: It is expected that for the wofs_ls_summary_alltime product
-    # there is one time step for each tile, however in case of
-    # multiple, pick the most recent time.
-    ds = dc.load(
-        datasets=task_datasets, measurements=["count_clear", "frequency"], like=tile_geobox
-    ).isel(time=0)
+    measurements = ["count_clear", "frequency"]
+    dc_query = dict(datasets=task_datasets, measurements=measurements)
 
     if not land_sea_mask_rasters_directory:
         _log.info(f"Skip masking ocean and sea pixels for tile {tile_index_str}")
+        gridspec = WaterbodiesGrid().gridspec
+        tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
+        # Note: It is expected that for the wofs_ls_summary_alltime product
+        # there is one time step for each tile, however in case of
+        # multiple, pick the earliest time.
+        ds = dc.load(like=tile_geobox, **dc_query).isel(time=0)
     else:
         land_sea_mask_raster_file = find_geotiff_files(
             directory_path=land_sea_mask_rasters_directory, file_name_pattern=tile_index_str
@@ -246,14 +245,15 @@ def load_wofs_frequency(
         if land_sea_mask_raster_file:
             # Load the land/sea mask raster for the tile.
             # Note: in the land/sea mask raster oceans/seas pixels must have a value of 0
-            # and the land pixels a value of 1.
-            land_sea_mask = rio_slurp_xarray(fname=land_sea_mask_raster_file[0], gbox=tile_geobox)
+            # and the land pixels a value of 1 and the same extent/geobox as the tile.
+            land_sea_mask = rio_slurp_xarray(fname=land_sea_mask_raster_file[0])
             # Erode the land pixels by 500 m
             eroded_land_sea_mask = binary_erosion(
                 image=land_sea_mask.values,
                 footprint=disk(radius=500 / abs(land_sea_mask.geobox.resolution[0])),
             )
             # Mask the WOfS data using the land sea mask
+            ds = dc.load(like=land_sea_mask.odc.geobox, **dc_query).isel(time=0)
             ds = ds.where(eroded_land_sea_mask)
         else:
             e = FileNotFoundError(
