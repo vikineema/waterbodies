@@ -47,12 +47,12 @@ def validate_waterbodies_polygons(waterbodies_polygons: gpd.GeoDataFrame) -> gpd
         The waterbodies polygons if all assertions passed.
     """
 
-    assert all([col in waterbodies_polygons.columns for col in ["UID", "WB_ID"]])
+    assert all([col in waterbodies_polygons.columns for col in ["uid", "wb_id"]])
 
-    assert waterbodies_polygons["UID"].is_unique
+    assert waterbodies_polygons["uid"].is_unique
 
-    assert waterbodies_polygons["WB_ID"].is_unique
-    assert waterbodies_polygons["WB_ID"].min() > 0
+    assert waterbodies_polygons["wb_id"].is_unique
+    assert waterbodies_polygons["wb_id"].min() > 0
 
     return waterbodies_polygons
 
@@ -111,12 +111,12 @@ def add_waterbodies_polygons_to_db(
     srid = waterbodies_polygons.crs.to_epsg()
 
     for row in waterbodies_polygons.itertuples():
-        if row.UID not in uids:
+        if row.uid not in uids:
             insert_parameters.append(
                 dict(
-                    uid=row.UID,
+                    uid=row.uid,
                     area_m2=row.area_m2,
-                    wb_id=row.WB_ID,
+                    wb_id=row.wb_id,
                     length_m=row.length_m,
                     perim_m=row.perim_m,
                     geometry=f"SRID={srid};{row.geometry.wkt}",
@@ -126,11 +126,11 @@ def add_waterbodies_polygons_to_db(
             if update_rows:
                 update_statements.append(
                     update(table)
-                    .where(table.c.uid == row.UID)
+                    .where(table.c.uid == row.uid)
                     .values(
                         dict(
                             area_m2=row.area_m2,
-                            wb_id=row.WB_ID,
+                            wb_id=row.wb_id,
                             length_m=row.length_m,
                             perim_m=row.perim_m,
                             geometry=f"SRID={srid};{row.geometry.wkt}",

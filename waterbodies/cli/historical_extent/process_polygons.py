@@ -105,14 +105,14 @@ def process_polygons(verbose, polygons_directory):
     waterbodies = waterbodies.to_crs("EPSG:4326")
 
     # Assign unique ids to the waterbodies.
-    waterbodies["UID"] = waterbodies.geometry.apply(
+    waterbodies["uid"] = waterbodies.geometry.apply(
         lambda x: gh.encode(x.centroid.y, x.centroid.x, precision=10)
     )
-    assert waterbodies["UID"].is_unique
-    waterbodies.sort_values(by=["UID"], inplace=True)
+    assert waterbodies["uid"].is_unique
+    waterbodies.sort_values(by=["uid"], inplace=True)
     waterbodies.reset_index(inplace=True, drop=True)
-    waterbodies["WB_ID"] = waterbodies.index + 1
-    assert waterbodies["WB_ID"].min() > 0
+    waterbodies["wb_id"] = waterbodies.index + 1
+    assert waterbodies["wb_id"].min() > 0
     _log.info(f"Final waterbodies count: {len(waterbodies)}")
 
     # Write the polygons to the database.
