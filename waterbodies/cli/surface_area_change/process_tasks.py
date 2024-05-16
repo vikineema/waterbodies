@@ -59,7 +59,6 @@ def process_tasks(
     historical_extent_rasters_directory,
     overwrite,
 ):
-
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
@@ -97,9 +96,7 @@ def process_tasks(
         task_id_str = get_task_id_str_from_tuple(task_id_tuple)
 
         try:
-
             if run_type == "backlog-processing":
-
                 if not overwrite:
                     exists = check_task_exists(task_id_str=task_id_str, engine=engine)
 
@@ -120,9 +117,6 @@ def process_tasks(
                             engine=engine,
                             update_rows=True,
                         )
-                        # _log.info(
-                        #     f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
-                        # )
 
                         _log.info(f"Task {task_id_str} complete")
                 else:
@@ -145,9 +139,6 @@ def process_tasks(
                         engine=engine,
                         update_rows=True,
                     )
-                    # _log.info(
-                    #    f"Task {task_id_str} has {len(waterbody_observations)} waterbody observations"
-                    # )
 
                     _log.info(f"Task {task_id_str} complete")
         except Exception as error:

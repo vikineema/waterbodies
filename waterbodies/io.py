@@ -70,7 +70,6 @@ def load_vector_file(path: str) -> gpd.GeoDataFrame:
 
 
 def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> list[str]:
-
     file_name_pattern = re.compile(file_name_pattern)
 
     fs = get_filesystem(path=directory_path)
@@ -94,7 +93,6 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
 
 
 def find_parquet_files(directory_path: str, file_name_pattern: str = ".*") -> list[str]:
-
     file_name_pattern = re.compile(file_name_pattern)
 
     fs = get_filesystem(path=directory_path)

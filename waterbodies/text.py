@@ -74,7 +74,6 @@ def get_tile_index_tuple_from_filename(file_path: str) -> tuple[int, int]:
 
 
 def get_task_id_str_from_tuple(task_id_tuple: tuple[str, int, int]) -> str:
-
     solar_day, tile_index_x, tile_index_y = task_id_tuple
 
     task_id_str = f"{solar_day}/x{tile_index_x:03d}/y{tile_index_y:03d}"
