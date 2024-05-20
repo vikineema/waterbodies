@@ -1,0 +1,32 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+    python: python3.10.6
+
+default_stages: [pre-commit, pre-push]
+
+# Test data is supposed to be verbatim, including errors. Exclude it from linting.
+exclude: tests/data
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: check-merge-conflict
+    -   id: check-yaml
+    -   id: check-toml
+    -   id: check-added-large-files
+    # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+-   repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 24.3.0
+    hooks:
+      - id: black-jupyter
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+-   repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+    -   id: flake8
