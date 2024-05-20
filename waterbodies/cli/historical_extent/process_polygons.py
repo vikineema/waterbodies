@@ -98,7 +98,8 @@ def process_polygons(verbose, polygons_directory):
     waterbodies["length_m"] = waterbodies.geometry.apply(get_polygon_length)
     waterbodies = waterbodies[waterbodies.length_m <= (150 * 1000)]
     _log.info(
-        f"Waterbodies count after filtering out waterbodies longer than than 150km: {len(waterbodies)}"
+        "Waterbodies count after filtering out waterbodies "
+        f"longer than than 150km: {len(waterbodies)}"
     )
 
     waterbodies["perim_m"] = waterbodies.geometry.length
