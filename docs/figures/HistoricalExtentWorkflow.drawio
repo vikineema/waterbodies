@@ -1,0 +1,106 @@
+<mxfile host="Electron" modified="2024-05-21T17:09:32.716Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="2svIu9mnLuclkfnH4zPz" version="24.4.0" type="device">
+  <diagram name="Page-1" id="GoKTBUcGqhX7uf0elc14">
+    <mxGraphModel dx="4947" dy="3486" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-1" value="Waterbodies Historical Extent" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="660" y="280" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=11;fontColor=default;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-2" target="vs8HGTL2HAozDXYzmL2D-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-2" value="Water Observations&lt;div&gt;from Space All Time Summary&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="-760" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=11;fontColor=default;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-3" target="vs8HGTL2HAozDXYzmL2D-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-3" value="Hydrosheds v1.1 Land Mask" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="-880" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-5" target="vs8HGTL2HAozDXYzmL2D-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-5" value="Mask ocean and sea pixels in the WOfS All Time Summary datasets" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="40" y="-760" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-6" target="vs8HGTL2HAozDXYzmL2D-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=11;fontColor=default;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-6" target="vs8HGTL2HAozDXYzmL2D-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-6" value="&lt;div&gt;Mask pixels that have been observed &amp;lt; 60 times&amp;nbsp;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="240" y="-760" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-8" target="vs8HGTL2HAozDXYzmL2D-30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-8" value="Threshold pixels using the 10%&amp;nbsp;detection threshold&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="480" y="-800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-46" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-9" target="vs8HGTL2HAozDXYzmL2D-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-9" value="Vectorize the regions(waterbodies) into polygons" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-47" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-10" target="vs8HGTL2HAozDXYzmL2D-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-10" value="Merge polygons artificially cut by tile boundaries" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-80" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-48" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-11" target="vs8HGTL2HAozDXYzmL2D-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-11" value="Filter polygons by max and min area and max length" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-49" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-13" target="vs8HGTL2HAozDXYzmL2D-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-13" value="Generate a geohash ID for each polygon" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="160" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-21" target="vs8HGTL2HAozDXYzmL2D-33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-21" value="Threshold pixels using the 5%&amp;nbsp;extent threshold&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="480" y="-680" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-37" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-22" target="vs8HGTL2HAozDXYzmL2D-36">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-22" value="Segment regions larger than 1000 pixels using watershed segmentation" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-440" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-24" target="vs8HGTL2HAozDXYzmL2D-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-24" value="Label regions and remove regions smaller than 6 pixels&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-560" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=11;fontColor=default;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;labelBackgroundColor=default;endArrow=classic;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-30" target="vs8HGTL2HAozDXYzmL2D-36">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-30" value="Detection raster" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="800" y="-800" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-35" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-33" target="vs8HGTL2HAozDXYzmL2D-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-33" value="Extent raster" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-680" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="vs8HGTL2HAozDXYzmL2D-36" target="vs8HGTL2HAozDXYzmL2D-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vs8HGTL2HAozDXYzmL2D-36" value="Discard regions that do not contain at least one pixel from the detection raster then discard regions smaller than 6 pixels" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-320" width="160" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

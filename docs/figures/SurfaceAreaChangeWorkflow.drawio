@@ -1,0 +1,49 @@
+<mxfile host="Electron" modified="2024-05-21T17:11:05.171Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="Whaa5Dck7IiOxqlbSMPL" version="24.4.0" type="device">
+  <diagram name="Page-1" id="PoXbQGGkHn2IiqusBMu0">
+    <mxGraphModel dx="2284" dy="1935" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-2" target="v2bUs0dWUvLKDh64cIxZ-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-2" value="Waterbodies Historical&amp;nbsp;&lt;div&gt;Extent Rasters&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-4" target="v2bUs0dWUvLKDh64cIxZ-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-4" value="For each WOfS feature layer, for each waterbody, get the total number of pixels, and the pixel counts for invalid, dry, and wet pixels" style="whiteSpace=wrap;html=1;rounded=0;strokeColor=#F7C39C;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="240" y="20" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-7" target="v2bUs0dWUvLKDh64cIxZ-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-7" value="Waterbodies&amp;nbsp;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Historical Extent&lt;/span&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry y="-200" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-8" target="v2bUs0dWUvLKDh64cIxZ-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-8" value="Rasterize the historical extent polygons" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;strokeColor=#F7C39C;" vertex="1" parent="1">
+          <mxGeometry y="-80" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-15" target="v2bUs0dWUvLKDh64cIxZ-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-15" value="Water Observations&amp;nbsp;&lt;div&gt;from Space&amp;nbsp;&lt;/div&gt;&lt;div&gt;Feature Layers&lt;div&gt;1984 - present&lt;/div&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="240" y="-120" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-25" value="Waterbodies Surface&lt;div&gt;&amp;nbsp;Area Change&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;strokeWidth=2;strokeColor=#613E78;" vertex="1" parent="1">
+          <mxGeometry x="640" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="v2bUs0dWUvLKDh64cIxZ-26" target="v2bUs0dWUvLKDh64cIxZ-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="v2bUs0dWUvLKDh64cIxZ-26" value="Get the area of the waterbody that was wet, dry or invalid" style="whiteSpace=wrap;html=1;rounded=0;strokeColor=#F7C39C;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="440" y="40" width="160" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
