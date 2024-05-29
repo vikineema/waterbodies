@@ -99,7 +99,6 @@ def mask_wofl(wofl: xr.Dataset) -> xr.DataArray:
 
 
 def get_pixel_counts(region_mask, intensity_image):
-
     masked_intensity_image = intensity_image[region_mask]
 
     # Hard coded mask values from mask_wofl function
