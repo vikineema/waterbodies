@@ -62,7 +62,7 @@ def is_geotiff(path: str) -> bool:
 
 def load_vector_file(path: str) -> gpd.GeoDataFrame:
     if is_parquet(path=path):
-        gdf = gpd.read_parquet(path, filesystem=get_filesystem(path=path))
+        gdf = gpd.read_parquet(path, filesystem=get_filesystem(path=path, anon=True))
     else:
         gdf = gpd.read_file(path)
     return gdf
@@ -71,7 +71,7 @@ def load_vector_file(path: str) -> gpd.GeoDataFrame:
 def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> list[str]:
     file_name_pattern = re.compile(file_name_pattern)
 
-    fs = get_filesystem(path=directory_path)
+    fs = get_filesystem(path=directory_path, anon=True)
 
     geotiff_file_paths = []
 
@@ -94,7 +94,7 @@ def find_geotiff_files(directory_path: str, file_name_pattern: str = ".*") -> li
 def find_parquet_files(directory_path: str, file_name_pattern: str = ".*") -> list[str]:
     file_name_pattern = re.compile(file_name_pattern)
 
-    fs = get_filesystem(path=directory_path)
+    fs = get_filesystem(path=directory_path, anon=True)
 
     parquet_file_paths = []
 
