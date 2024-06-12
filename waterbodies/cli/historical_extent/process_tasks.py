@@ -61,7 +61,7 @@ def process_tasks(
         _log.error(e)
         raise e
 
-    fs = get_filesystem(path=tasks_list_file)
+    fs = get_filesystem(path=tasks_list_file, anon=True)
     with fs.open(tasks_list_file) as file:
         content = file.read()
         decoded_content = content.decode()
@@ -74,7 +74,7 @@ def process_tasks(
         pass
 
     if not check_directory_exists(path=output_directory):
-        fs = get_filesystem(output_directory)
+        fs = get_filesystem(output_directory, anon=False)
         fs.mkdirs(output_directory)
         _log.info(f"Created the directory {output_directory}")
 
@@ -127,7 +127,7 @@ def process_tasks(
         tasks_directory = "/tmp/"
         failed_tasks_output_file = os.path.join(tasks_directory, "failed_tasks")
 
-        fs = get_filesystem(path=tasks_directory)
+        fs = get_filesystem(path=tasks_directory, anon=False)
 
         if not check_directory_exists(path=tasks_directory):
             fs.mkdirs(path=tasks_directory, exist_ok=True)
