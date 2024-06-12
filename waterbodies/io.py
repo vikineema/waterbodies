@@ -17,18 +17,17 @@ def is_s3_path(path: str) -> bool:
 
 def get_filesystem(
     path: str,
+    anon: bool = True,
 ) -> S3FileSystem | LocalFileSystem:
     if is_s3_path(path=path):
-        fs = s3fs.S3FileSystem(
-            anon=False, s3_additional_kwargs={"ACL": "bucket-owner-full-control"}
-        )
+        fs = s3fs.S3FileSystem(anon=anon, s3_additional_kwargs={"ACL": "bucket-owner-full-control"})
     else:
         fs = fsspec.filesystem("file")
     return fs
 
 
 def check_file_exists(path: str) -> bool:
-    fs = get_filesystem(path=path)
+    fs = get_filesystem(path=path, anon=True)
     if fs.exists(path) and fs.isfile(path):
         return True
     else:
@@ -36,7 +35,7 @@ def check_file_exists(path: str) -> bool:
 
 
 def check_directory_exists(path: str) -> bool:
-    fs = get_filesystem(path=path)
+    fs = get_filesystem(path=path, anon=True)
     if fs.exists(path) and fs.isdir(path):
         return True
     else:
