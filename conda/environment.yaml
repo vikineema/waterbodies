@@ -6,4 +6,5 @@ dependencies:
   - gdal = 3.6.3 
   - pip-tools
   - pip:
+    - pre-commit
     - -r ../requirements.txt
