@@ -41,7 +41,7 @@ def rasterise_polygons(
     _log = logging.getLogger(__name__)
 
     if not check_directory_exists(historical_extent_rasters_directory):
-        fs = get_filesystem(historical_extent_rasters_directory)
+        fs = get_filesystem(historical_extent_rasters_directory, anon=False)
         fs.mkdirs(historical_extent_rasters_directory)
         _log.info(f"Created directory {historical_extent_rasters_directory}")
 

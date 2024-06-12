@@ -71,7 +71,7 @@ def process_tasks(
 
     engine = get_waterbodies_engine()
 
-    fs = get_filesystem(path=tasks_list_file)
+    fs = get_filesystem(path=tasks_list_file, anon=True)
     with fs.open(tasks_list_file) as file:
         content = file.read()
         decoded_content = content.decode()
@@ -152,7 +152,7 @@ def process_tasks(
         tasks_directory = "/tmp/"
         failed_tasks_output_file = os.path.join(tasks_directory, "failed_tasks")
 
-        fs = get_filesystem(path=tasks_directory)
+        fs = get_filesystem(path=tasks_directory, anon=False)
 
         if not check_directory_exists(path=tasks_directory):
             fs.mkdirs(path=tasks_directory, exist_ok=True)
