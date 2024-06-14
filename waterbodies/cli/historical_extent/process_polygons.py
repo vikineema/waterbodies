@@ -134,3 +134,4 @@ def process_polygons(verbose, polygons_directory, output_directory):
 
     output_file_name = os.path.join(output_directory, "waterbodies-donut-holes-fixed.parquet")
     waterbodies.to_parquet(output_file_name)
+    # Need random commit
