@@ -231,7 +231,10 @@ def load_wofs_frequency(
     dc_query = dict(datasets=task_datasets, measurements=measurements)
 
     if not land_sea_mask_rasters_directory:
-        _log.info(f"Skip masking ocean and sea pixels for tile {tile_index_str}")
+        _log.info(
+            f"Skip masking ocean and sea pixels for tile {tile_index_str}, "
+            "no land/sea mask rasters directory provided."
+        )
         gridspec = WaterbodiesGrid().gridspec
         tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
         # Note: It is expected that for the wofs_ls_summary_alltime product
@@ -256,12 +259,16 @@ def load_wofs_frequency(
             ds = dc.load(like=land_sea_mask.odc.geobox, **dc_query).isel(time=0)
             ds = ds.where(eroded_land_sea_mask)
         else:
-            e = FileNotFoundError(
-                f"Tile {tile_index_str} does not have a land/sea mask"
+            _log.info(
+                f"Tile {tile_index_str} does not have a land/sea mask "
                 f"raster in the directory {land_sea_mask_rasters_directory}"
             )
-            _log.error(e)
-            raise e
+            gridspec = WaterbodiesGrid().gridspec
+            tile_geobox = gridspec.tile_geobox(tile_index=tile_index)
+            # Note: It is expected that for the wofs_ls_summary_alltime product
+            # there is one time step for each tile, however in case of
+            # multiple, pick the earliest time.
+            ds = dc.load(like=tile_geobox, **dc_query).isel(time=0)
 
     # Threshold using the extent and detection thresholds.
     ds["count_clear"] = ds["count_clear"].where(ds["count_clear"] != -999)

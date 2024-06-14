@@ -1,4 +1,5 @@
 import logging
+import os
 
 import click
 import geohash as gh
@@ -7,14 +8,13 @@ import pandas as pd
 from datacube import Datacube
 from shapely.ops import unary_union
 
-from waterbodies.db import get_waterbodies_engine
+# from waterbodies.db import get_waterbodies_engine
 from waterbodies.grid import WaterbodiesGrid
-from waterbodies.historical_extent import (
-    add_waterbodies_polygons_to_db,
+from waterbodies.historical_extent import (  # add_waterbodies_polygons_to_db,
     get_polygon_length,
 )
 from waterbodies.hopper import create_tasks_from_datasets
-from waterbodies.io import find_parquet_files
+from waterbodies.io import check_directory_exists, find_parquet_files, get_filesystem
 from waterbodies.logs import logging_setup
 
 
@@ -29,7 +29,12 @@ from waterbodies.logs import logging_setup
     type=str,
     help="Directory containing the waterbodies files from the process-tasks step.",
 )
-def process_polygons(verbose, polygons_directory):
+@click.option(
+    "--output-directory",
+    type=str,
+    help="Directory to write the waterbodies final dataset to.",
+)
+def process_polygons(verbose, polygons_directory, output_directory):
     logging_setup(verbose)
     _log = logging.getLogger(__name__)
 
@@ -117,7 +122,15 @@ def process_polygons(verbose, polygons_directory):
     _log.info(f"Final waterbodies count: {len(waterbodies)}")
 
     # Write the polygons to the database.
-    engine = get_waterbodies_engine()
-    add_waterbodies_polygons_to_db(
-        waterbodies_polygons=waterbodies, engine=engine, update_rows=True
-    )
+    # engine = get_waterbodies_engine()
+    # add_waterbodies_polygons_to_db(
+    #     waterbodies_polygons=waterbodies, engine=engine, update_rows=True
+    # )
+    # Write the polygons to a file.
+    if not check_directory_exists(path=output_directory):
+        fs = get_filesystem(output_directory, anon=False)
+        fs.mkdirs(output_directory)
+        _log.info(f"Created the directory {output_directory}")
+
+    output_file_name = os.path.join(output_directory, "waterbodies-donut-holes-fixed.parquet")
+    waterbodies.to_parquet(output_file_name)
