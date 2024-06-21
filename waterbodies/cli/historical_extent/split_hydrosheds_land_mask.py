@@ -4,13 +4,18 @@ import os
 import click
 import geopandas as gpd
 import numpy as np
+import rioxarray  # noqa F401
 from datacube import Datacube
-from odc.geo.xr import to_cog
 from tqdm import tqdm
 
 from waterbodies.grid import WaterbodiesGrid
 from waterbodies.hopper import create_tasks_from_datasets
-from waterbodies.io import check_directory_exists, get_filesystem, load_vector_file
+from waterbodies.io import (
+    check_directory_exists,
+    get_filesystem,
+    is_s3_path,
+    load_vector_file,
+)
 from waterbodies.logs import logging_setup
 from waterbodies.text import get_tile_index_str_from_tuple
 from waterbodies.utils import rio_slurp_xarray
@@ -51,6 +56,12 @@ def split_hydrosheds_land_mask(
         fs = get_filesystem(output_directory, anon=False)
         fs.mkdirs(output_directory)
         _log.info(f"Created directory {output_directory}")
+
+    if is_s3_path(output_directory):
+        # To avoid the error GDAL signalled an error: err_no=1, msg='w+ not supported for /vsis3,
+        # unless CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE is set to YES'
+        # when writing to s3 using rioxarray's rio.to_raster
+        os.environ["CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE"] = "YES"
 
     # Find all the tiles that will be used to generate the Waterbodies
     # historical extent polygons
@@ -110,6 +121,10 @@ def split_hydrosheds_land_mask(
                 tile_hydrosheds_land_mask == 1, tile_hydrosheds_land_mask == 3
             ).astype(int)
             # Write to file
-            cog_bytes = to_cog(geo_im=tile_raster)
-            with fs.open(tile_raster_fp, "wb") as f:
-                f.write(cog_bytes)
+            tile_raster.rio.to_raster(tile_raster_fp)
+
+            # Requires libtiff > 4.3.0
+            # from odc.geo.xr import to_cog
+            # cog_bytes = to_cog(geo_im=tile_raster)
+            # with fs.open(tile_raster_fp, "wb") as f:
+            #     f.write(cog_bytes)
