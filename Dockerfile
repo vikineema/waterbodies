@@ -23,6 +23,8 @@ RUN apt clean && apt update \
   # For hdstats
     python3-dev \
     build-essential \
+  # For rasterio
+    libtiff-tools \
   # For spatialite 
     libsqlite3-mod-spatialite \
   # Clean up.
