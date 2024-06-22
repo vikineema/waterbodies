@@ -122,9 +122,3 @@ def split_hydrosheds_land_mask(
             ).astype(int)
             # Write to file
             tile_raster.rio.to_raster(tile_raster_fp)
-
-            # Requires libtiff > 4.3.0
-            # from odc.geo.xr import to_cog
-            # cog_bytes = to_cog(geo_im=tile_raster)
-            # with fs.open(tile_raster_fp, "wb") as f:
-            #     f.write(cog_bytes)
