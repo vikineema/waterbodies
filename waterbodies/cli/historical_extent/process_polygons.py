@@ -14,7 +14,12 @@ from waterbodies.historical_extent import (  # add_waterbodies_polygons_to_db,
     get_polygon_length,
 )
 from waterbodies.hopper import create_tasks_from_datasets
-from waterbodies.io import check_directory_exists, find_parquet_files, get_filesystem
+from waterbodies.io import (
+    check_directory_exists,
+    find_parquet_files,
+    get_filesystem,
+    load_vector_file,
+)
 from waterbodies.logs import logging_setup
 
 
@@ -47,7 +52,7 @@ def process_polygons(verbose, polygons_directory, output_directory):
 
     waterbodies_list = []
     for file in files:
-        gdf = gpd.read_file(file).to_crs(gridspec.crs)
+        gdf = load_vector_file(file).to_crs(gridspec.crs)
         waterbodies_list.append(gdf)
 
     waterbodies = pd.concat(waterbodies_list, ignore_index=True)
