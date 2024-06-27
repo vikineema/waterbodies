@@ -106,11 +106,11 @@ def process_polygons(verbose, polygons_directory, output_directory):
     )
 
     waterbodies["length_m"] = waterbodies.geometry.apply(get_polygon_length)
-    waterbodies = waterbodies[waterbodies.length_m <= (150 * 1000)]
-    _log.info(
-        "Waterbodies count after filtering out waterbodies "
-        f"longer than than 150km: {len(waterbodies)}"
-    )
+    # waterbodies = waterbodies[waterbodies.length_m <= (150 * 1000)]
+    # _log.info(
+    #     "Waterbodies count after filtering out waterbodies "
+    #     f"longer than than 150km: {len(waterbodies)}"
+    # )
 
     waterbodies["perim_m"] = waterbodies.geometry.length
     waterbodies = waterbodies.to_crs("EPSG:4326")
