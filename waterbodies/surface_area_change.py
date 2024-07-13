@@ -177,7 +177,7 @@ def get_waterbody_observations(
         historical_extent_raster = rioxarray.open_rasterio(
             historical_extent_raster_file[0]
         ).squeeze("band", drop=True)
-        # Get the mapping of WB_ID to UID from the attributes.
+        # Get the mapping of wb_id to uid from the attributes.
         wbid_to_uid = json.loads(historical_extent_raster.attrs["WB_ID_to_UID"])
     else:
         e = FileNotFoundError(
