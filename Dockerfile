@@ -1,4 +1,4 @@
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.9.1
+FROM osgeo/gdal:ubuntu-small-3.6.3
 
 ENV SHELL=bash
 
