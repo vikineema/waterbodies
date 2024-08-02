@@ -41,7 +41,7 @@ def rasterise_polygons(
     _log = logging.getLogger(__name__)
 
     if not check_directory_exists(historical_extent_rasters_directory):
-        fs = get_filesystem(historical_extent_rasters_directory)
+        fs = get_filesystem(historical_extent_rasters_directory, anon=False)
         fs.mkdirs(historical_extent_rasters_directory)
         _log.info(f"Created directory {historical_extent_rasters_directory}")
 
@@ -71,7 +71,7 @@ def rasterise_polygons(
         waterbodies_polygons=historical_extent_polygons
     )
     historical_extent_polygons = historical_extent_polygons.to_crs(gridspec.crs)
-    historical_extent_polygons.set_index("WB_ID", inplace=True)
+    historical_extent_polygons.set_index("wb_id", inplace=True)
 
     with tqdm(
         iterable=tiles, desc="Rasterise historical extent polygons by grid tile", total=len(tiles)
@@ -91,7 +91,7 @@ def rasterise_polygons(
             if not intersecting_polygons_ids:
                 continue
             else:
-                # Rasterize the intersecting historical extent polygons using the WB_ID for the
+                # Rasterize the intersecting historical extent polygons using the wb_id for the
                 # polygon as the pixel value.
                 intersecting_polygons = historical_extent_polygons[
                     historical_extent_polygons.index.isin(intersecting_polygons_ids)
@@ -101,11 +101,11 @@ def rasterise_polygons(
                     shapes=shapes, out_shape=tile_geobox.shape, transform=tile_geobox.transform
                 )
                 tile_raster_ds = wrap_xr(im=tile_raster_np, gbox=tile_geobox)
-                # Add a dictionary mapping the WB_ID values to the UID values as part of the
+                # Add a dictionary mapping the wb_id values to the uid values as part of the
                 # metadata of the raster.
                 tags = dict(
                     WB_ID_to_UID=json.dumps(
-                        dict(zip(intersecting_polygons.index, intersecting_polygons.UID))
+                        dict(zip(intersecting_polygons.index, intersecting_polygons.uid))
                     )
                 )
                 # Write the raster to file.

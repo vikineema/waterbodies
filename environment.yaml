@@ -1,4 +1,4 @@
-name: waterbodies
+name: waterbodies-env
 channels:
   - conda-forge
 dependencies:
@@ -6,4 +6,6 @@ dependencies:
   - gdal = 3.6.3 
   - pip-tools
   - pip:
-    - -r ../requirements.txt
+    - pre-commit
+    - -r requirements.txt
+    - -e .[dev]

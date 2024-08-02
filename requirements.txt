@@ -12,11 +12,11 @@ affine==2.4.0
     #   odc-geo
     #   odc-stac
     #   rasterio
-aiobotocore[boto3]==2.12.2
+aiobotocore[boto3]==2.13.0
     # via
     #   odc-cloud
     #   s3fs
-aiohttp==3.9.3
+aiohttp==3.9.5
     # via
     #   aiobotocore
     #   s3fs
@@ -40,16 +40,16 @@ attrs==23.2.0
     #   jsonschema
     #   rasterio
     #   referencing
-black[jupyter]==24.3.0
+black[jupyter]==24.4.2
     # via waterbodies (pyproject.toml)
 boltons==24.0.0
     # via eodatasets3
-boto3==1.34.51
+boto3==1.34.106
     # via
     #   aiobotocore
     #   eodatasets3
     #   odc-cloud
-botocore==1.34.51
+botocore==1.34.106
     # via
     #   aiobotocore
     #   boto3
@@ -63,14 +63,14 @@ cachetools==5.3.3
     #   odc-geo
 cattrs==23.2.3
     # via eodatasets3
-certifi==2024.2.2
+certifi==2024.6.2
     # via
     #   fiona
     #   netcdf4
     #   pyproj
     #   rasterio
     #   requests
-cftime==1.6.3
+cftime==1.6.4
     # via netcdf4
 charset-normalizer==3.3.2
     # via requests
@@ -106,9 +106,9 @@ cloudpickle==3.0.0
     #   dask
     #   datacube
     #   distributed
-coverage==7.4.4
+coverage==7.5.3
     # via waterbodies (pyproject.toml)
-dask[array,dataframe]==2024.4.1
+dask[array,dataframe]==2024.6.2
     # via
     #   dask-expr
     #   dask-image
@@ -117,9 +117,9 @@ dask[array,dataframe]==2024.4.1
     #   odc-algo
     #   odc-stac
     #   odc-stats
-dask-expr==1.0.10
+dask-expr==1.1.6
     # via dask
-dask-image==2023.8.1
+dask-image==2024.5.3
     # via odc-algo
 datacube==1.8.18
     # via
@@ -137,7 +137,7 @@ defusedxml==0.7.1
     # via eodatasets3
 deprecat==2.1.1
     # via datacube
-distributed==2024.4.1
+distributed==2024.6.2
     # via
     #   datacube
     #   odc-algo
@@ -146,7 +146,7 @@ eodatasets3==0.30.5
     # via
     #   odc-apps-dc-tools
     #   odc-stats
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via
     #   cattrs
     #   ipython
@@ -158,13 +158,13 @@ fiona==1.9.6
     #   eodatasets3
     #   geopandas
     #   odc-stats
-flake8==7.0.0
+flake8==7.1.0
     # via waterbodies (pyproject.toml)
 frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-fsspec==2024.3.1
+fsspec==2024.6.0
     # via
     #   dask
     #   odc-apps-dc-tools
@@ -175,43 +175,43 @@ gdal==3.6.3
     # via
     #   odc-stats
     #   waterbodies (pyproject.toml)
-geoalchemy2==0.14.7
+geoalchemy2==0.15.1
     # via
     #   datacube
     #   waterbodies (pyproject.toml)
-geopandas==0.14.3
+geopandas==0.14.4
     # via waterbodies (pyproject.toml)
 greenlet==3.0.3
     # via sqlalchemy
-h5py==3.10.0
+h5py==3.11.0
     # via eodatasets3
-idna==3.6
+idna==3.7
     # via
     #   requests
     #   yarl
-imageio==2.34.0
+imageio==2.34.1
     # via
     #   pims
     #   scikit-image
-importlib-metadata==7.1.0
+importlib-metadata==7.2.0
     # via dask
 importlib-resources==6.4.0
     # via odc-apps-dc-tools
 iniconfig==2.0.0
     # via pytest
-ipython==8.23.0
+ipython==8.25.0
     # via black
 isort==5.13.2
     # via waterbodies (pyproject.toml)
 jedi==0.19.1
     # via ipython
-jinja2==3.1.3
+jinja2==3.1.4
     # via distributed
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-jsonschema==4.21.1
+jsonschema==4.22.0
     # via
     #   datacube
     #   eodatasets3
@@ -228,13 +228,13 @@ locket==1.0.0
     # via
     #   distributed
     #   partd
-mako==1.3.2
+mako==1.3.5
     # via alembic
 markupsafe==2.1.5
     # via
     #   jinja2
     #   mako
-matplotlib-inline==0.1.6
+matplotlib-inline==0.1.7
     # via ipython
 mccabe==0.7.0
     # via flake8
@@ -244,25 +244,26 @@ multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
-mypy==1.9.0
+mypy==1.10.0
     # via waterbodies (pyproject.toml)
 mypy-extensions==1.0.0
     # via
     #   black
     #   mypy
-netcdf4==1.6.5
+netcdf4==1.7.1
     # via datacube
 networkx==3.3
     # via scikit-image
-numexpr==2.10.0
+numexpr==2.10.1
     # via odc-algo
-numpy==1.26.4
+numpy==2.0.0
     # via
     #   cftime
     #   dask
     #   dask-image
     #   datacube
     #   eodatasets3
+    #   geopandas
     #   h5py
     #   imageio
     #   netcdf4
@@ -285,7 +286,7 @@ numpy==1.26.4
     #   xarray
 odc-algo==0.2.3
     # via odc-stats
-odc-apps-dc-tools==0.2.16
+odc-apps-dc-tools==0.2.17
     # via waterbodies (pyproject.toml)
 odc-cloud[async]==0.2.5
     # via
@@ -295,7 +296,7 @@ odc-dscache==0.2.3
     # via
     #   odc-stats
     #   waterbodies (pyproject.toml)
-odc-geo==0.4.3
+odc-geo==0.4.6
     # via
     #   odc-stac
     #   waterbodies (pyproject.toml)
@@ -305,9 +306,9 @@ odc-io==0.2.2
     #   odc-stats
 odc-stac==0.3.9
     # via odc-stats
-odc-stats==1.0.41
+odc-stats==1.0.46
     # via waterbodies (pyproject.toml)
-packaging==24.0
+packaging==24.1
     # via
     #   black
     #   dask
@@ -316,11 +317,12 @@ packaging==24.0
     #   geoalchemy2
     #   geopandas
     #   lazy-loader
+    #   pims
     #   pytest
     #   rioxarray
     #   scikit-image
     #   xarray
-pandas==2.2.1
+pandas==2.2.2
     # via
     #   dask
     #   dask-expr
@@ -334,7 +336,7 @@ pandas==2.2.1
     #   xarray
 parso==0.8.4
     # via jedi
-partd==1.4.1
+partd==1.4.2
     # via dask
 pathspec==0.12.1
     # via black
@@ -344,15 +346,15 @@ pillow==10.3.0
     # via
     #   imageio
     #   scikit-image
-pims==0.6.1
+pims==0.7
     # via dask-image
-platformdirs==4.2.0
+platformdirs==4.2.2
     # via black
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
-prompt-toolkit==3.0.43
+prompt-toolkit==3.0.47
     # via ipython
-psutil==5.9.8
+psutil==6.0.0
     # via distributed
 psycopg2==2.9.9
     # via
@@ -362,13 +364,13 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-pyarrow==15.0.2
+pyarrow==16.1.0
     # via dask-expr
-pycodestyle==2.11.1
+pycodestyle==2.12.0
     # via flake8
 pyflakes==3.2.0
     # via flake8
-pygments==2.17.2
+pygments==2.18.0
     # via ipython
 pyparsing==3.1.2
     # via snuggs
@@ -379,7 +381,7 @@ pyproj==3.6.1
     #   geopandas
     #   odc-geo
     #   rioxarray
-pystac[validation]==1.10.0
+pystac[validation]==1.10.1
     # via
     #   eodatasets3
     #   odc-apps-dc-tools
@@ -387,9 +389,9 @@ pystac[validation]==1.10.0
     #   odc-stats
     #   pystac-client
     #   rio-stac
-pystac-client==0.7.6
+pystac-client==0.8.2
     # via odc-apps-dc-tools
-pytest==8.1.1
+pytest==8.2.2
     # via waterbodies (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
@@ -402,7 +404,7 @@ python-dotenv==1.0.1
     # via waterbodies (pyproject.toml)
 python-geohash==0.8.5
     # via waterbodies (pyproject.toml)
-python-rapidjson==1.16
+python-rapidjson==1.17
     # via eodatasets3
 pytz==2024.1
     # via pandas
@@ -412,7 +414,7 @@ pyyaml==6.0.1
     #   datacube
     #   distributed
     #   odc-apps-dc-tools
-rasterio==1.3.9
+rasterio==1.3.10
     # via
     #   datacube
     #   eodatasets3
@@ -422,20 +424,20 @@ rasterio==1.3.9
     #   rio-stac
     #   rioxarray
     #   waterbodies (pyproject.toml)
-referencing==0.34.0
+referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.31.0
+requests==2.32.3
     # via
     #   datadog
     #   pystac-client
     #   urlpath
 rio-stac==0.9.0
     # via odc-apps-dc-tools
-rioxarray==0.15.3
+rioxarray==0.15.6
     # via waterbodies (pyproject.toml)
-rpds-py==0.18.0
+rpds-py==0.18.1
     # via
     #   jsonschema
     #   referencing
@@ -445,20 +447,20 @@ ruamel-yaml==0.18.6
     #   eodatasets3
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-s3fs==2024.3.1
+s3fs==2024.6.0
     # via waterbodies (pyproject.toml)
 s3transfer==0.10.1
     # via boto3
-scikit-image==0.22.0
+scikit-image==0.24.0
     # via
     #   odc-algo
     #   waterbodies (pyproject.toml)
-scipy==1.13.0
+scipy==1.13.1
     # via
     #   dask-image
     #   eodatasets3
     #   scikit-image
-shapely==2.0.3
+shapely==2.0.4
     # via
     #   datacube
     #   eodatasets3
@@ -483,13 +485,14 @@ sqlalchemy==1.4.52
     #   waterbodies (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-structlog==24.1.0
+structlog==24.2.0
     # via eodatasets3
 tblib==3.0.0
     # via distributed
-tifffile==2024.2.12
+tifffile==2024.6.18
     # via
     #   dask-image
+    #   pims
     #   scikit-image
 tokenize-rt==5.2.0
     # via black
@@ -510,17 +513,17 @@ toolz==0.12.1
     #   odc-stats
     #   partd
     #   waterbodies (pyproject.toml)
-tornado==6.4
+tornado==6.4.1
     # via distributed
-tqdm==4.66.2
+tqdm==4.66.4
     # via
     #   odc-stats
     #   waterbodies (pyproject.toml)
-traitlets==5.14.2
+traitlets==5.14.3
     # via
     #   ipython
     #   matplotlib-inline
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via
     #   alembic
     #   black
@@ -529,7 +532,7 @@ typing-extensions==4.11.0
     #   mypy
 tzdata==2024.1
     # via pandas
-urllib3==2.0.7
+urllib3==2.2.2
     # via
     #   botocore
     #   distributed
@@ -542,7 +545,7 @@ wrapt==1.16.0
     # via
     #   aiobotocore
     #   deprecat
-xarray==2024.3.0
+xarray==2024.6.0
     # via
     #   datacube
     #   eodatasets3
@@ -555,7 +558,7 @@ yarl==1.9.4
     # via aiohttp
 zict==3.0.0
     # via distributed
-zipp==3.18.1
+zipp==3.19.2
     # via importlib-metadata
 zstandard==0.22.0
     # via odc-dscache

@@ -151,7 +151,7 @@ def generate_tasks(
     tasks_output_file = os.path.join(tasks_directory, "tasks_chunks")
     tasks_count_file = os.path.join(tasks_directory, "tasks_chunks_count")
 
-    fs = get_filesystem(path=tasks_directory)
+    fs = get_filesystem(path=tasks_directory, anon=False)
 
     if not check_directory_exists(path=tasks_directory):
         fs.mkdirs(path=tasks_directory, exist_ok=True)
