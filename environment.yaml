@@ -1,4 +1,4 @@
-name: waterbodies
+name: waterbodies-env
 channels:
   - conda-forge
 dependencies:
@@ -7,4 +7,5 @@ dependencies:
   - pip-tools
   - pip:
     - pre-commit
-    - -r ../requirements.txt
+    - -r requirements.txt
+    - -e .[dev]
