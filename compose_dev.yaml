@@ -1,0 +1,43 @@
+services:
+  postgres:
+    extends:
+      file: compose.yaml
+      service: postgres
+
+  waterbodies-test:
+    extends:
+      file: compose.yaml
+      service: waterbodies
+    build:
+      args:
+        BUILD_ENV: "dev"
+    ports:
+      - ${JUPYTER_PORT}:8888
+    volumes:
+      - .:/home/jovyan/
+
+  explorer:
+    image: opendatacube/explorer:latest
+    environment:
+    # - DB_HOSTNAME=host.docker.internal
+    - POSTGRES_HOSTNAME=postgres
+    - POSTGRES_USER=${POSTGRES_USER}
+    - POSTGRES_PASSWORD=${POSTGRES_PASS}
+    - POSTGRES_DB=${POSTGRES_DB}
+    - POSTGRES_PORT=5432
+    - ODC_DEFAULT_INDEX_DRIVER=postgres
+    - ODC_POSTGIS_INDEX_DRIVER=postgis
+    - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
+    - ODC_POSTGIS_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
+    - FLASK_ENV=development
+    - FLASK_APP=cubedash
+    - FLASK_DEBUG=1
+    - CUBEDASH_DEFAULT_TIMEZONE=${CUBEDASH_DEFAULT_TIMEZONE}
+    - AWS_NO_SIGN_REQUEST=${AWS_NO_SIGN_REQUEST}
+    - CUBEDASH_DATA_S3_REGION=${AWS_DEFAULT_REGION}
+    - AWS_S3_ENDPOINT=https://s3.af-south-1.amazonaws.com
+    # - VIRTUAL_HOST=datacube.explorer
+    depends_on:
+      - postgres
+    ports:
+      - ${EXPLORER_PORT}:8080

@@ -10,7 +10,7 @@ on:
 
 
 env:
-  IMAGE_NAME: digitalearthafrica/waterbodies
+  IMAGE_NAME: ${{ vars.DOCKER_ORG_NAME }}/waterbodies
 
 jobs:
   push_to_registry:

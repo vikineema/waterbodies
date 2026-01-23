@@ -1,10 +1,53 @@
 name: waterbodies-env
 channels:
   - conda-forge
+  - nodefaults
 dependencies:
-  - python = 3.12.3
-  - gdal = 3.10.1
-  - pip-tools
-  - pip:
-      - -r requirements.txt
-      - -e .[dev]
+  # base
+  - python=3.12
+  - gdal
+  - libgdal
+  - libgdal-arrow-parquet
+  # datacube[s3, performance]
+  - datacube>=1.9.0
+  - boto3
+  - botocore
+  - bottleneck
+  - ciso8601
+  # odc libraries
+  - odc-dscache
+  - odc-geo>=0.4.8
+  - odc-loader>=0.6.3
+  - odc-stac>= 0.5.0
+   # fsspec + extras
+  - fsspec>=2026.1.0
+  - s3fs>=2026.1.0
+  # xarray + extras
+  - xarray
+  - bottleneck
+  - dask
+  - netCDF4
+  # other dependencies tools
+  - alembic
+  - click
+  - geoalchemy2
+  - geopandas
+  - numpy
+  - pandas
+  - python-dotenv
+  - python-geohash
+  - rasterio
+  - rioxarray
+  - scikit-image 
+  - sqlalchemy
+  - toolz
+  - tqdm
+  # testing
+  - pytest
+  - coverage
+  - odc-apps-dc-tools>=1.9.7
+  # linting
+  - ruff
+  - pre-commit
+  # viz
+  - lxml
