@@ -17,15 +17,15 @@ requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = [
     "click",
-    "datacube[s3, performance]==1.8.20",
+    "datacube[s3, distributed, performance]>=1.9.0",
     "fsspec",
     "geoalchemy2",
     "geopandas[all]",
     "numpy",
     "odc-dscache",
     "odc-geo",
-    "odc-stats",
-    "pandas==2.1.4", # due to sqalchemy dependency for datacube 1.8.x,
+    "odc-stats>=1.9.6",
+    "pandas",
     "python-dotenv",
     "python-geohash",
     "rasterio",
@@ -43,7 +43,7 @@ dependencies = [
 tests = [
     "pytest",
     "coverage",
-    "odc-apps-dc-tools",
+    "odc-apps-dc-tools>1.9.7",
 ]
 lint = [
     "black[jupyter]",
