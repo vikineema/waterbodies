@@ -67,3 +67,7 @@ Add the waterbodies database credentials to a `.env` file in your `HOME` directo
 Your code will now be formatted and validated before each commit by running `pre-commit run -a`
 
 
+### Versioning
+
+The is codebase follows [Semantic Versioning](https://semver.org/) and the version is specified in the `pyproject.toml` file. The image tags for the `digitalearthafrica/waterbodies` docker image should directly match the code version. 
+Please not the versioning in this repository is seperate from the versioning for the Digital Earth Waterbodies Service. Versioning for the continental service is discussed seperately in the Waterbodies service: repository workflow and redesign document. 
