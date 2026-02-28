@@ -63,13 +63,13 @@ Repository = "https://github.com/digitalearthafrica/waterbodies.git"
 waterbodies = "waterbodies.cli.main:waterbodies"
 
 [tool.setuptools]
-packages = ["waterbodies"]
+package-dir = {"" = "src"}
 
 [tool.setuptools.dynamic]
 version = {attr = "waterbodies.__version__"}
 
 [tool.setuptools_scm]
-version_file = "waterbodies/_version.py"
+version_file = "src/waterbodies/_version.py"
 
 [tool.isort]
 profile = "black"
