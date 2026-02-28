@@ -261,7 +261,7 @@ ipython-pygments-lexers==1.1.1
     # via ipython
 isoduration==20.11.0
     # via jsonschema
-isort==8.0.0
+isort==8.0.1
     # via waterbodies (pyproject.toml)
 jedi==0.19.2
     # via ipython

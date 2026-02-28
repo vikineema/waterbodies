@@ -1,20 +1,29 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
+requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "waterbodies"
-# version = "0.0.1"
+version = "0.1.28"
 authors = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
 maintainers = [{name = "Digital Earth Africa", email = "systems@digitalearthafrica.org"}]
 description = "DE Africa waterbodies"
 readme =  {file = "README.md", content-type = "text/markdown"}
-license = {file = "LICENSE"}
+license = "Apache-2.0"
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Information Analysis",
 ]
-requires-python = ">=3.9"
-dynamic = ["version"]
+requires-python = ">=3.10"
 dependencies = [
     "click",
     "datacube[s3, distributed, performance]>=1.9.0",
@@ -64,12 +73,6 @@ waterbodies = "waterbodies.cli.main:waterbodies"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-
-[tool.setuptools.dynamic]
-version = {attr = "waterbodies.__version__"}
-
-[tool.setuptools_scm]
-version_file = "src/waterbodies/_version.py"
 
 [tool.isort]
 profile = "black"
