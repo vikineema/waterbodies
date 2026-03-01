@@ -15,7 +15,7 @@ class WaterbodyHistoricalExtent(WaterbodyBase):
     area_m2: Mapped[float] = Column(Float)
     length_m: Mapped[float] = Column(Float)
     perim_m: Mapped[float] = Column(Float)
-    geometry = Column(Geometry(geometry_type="POLYGON"))
+    geometry = Column(Geometry(geometry_type="POLYGON", srid=4326))
     last_obs_date: Mapped[datetime] = Column(Date)
     last_valid_obs_date: Mapped[datetime] = Column(Date)
     last_valid_obs: Mapped[float] = Column(Float)
