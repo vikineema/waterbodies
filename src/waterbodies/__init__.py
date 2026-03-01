@@ -1,3 +1,4 @@
-from waterbodies._version import version
 
-__version__ = version
+from importlib.metadata import version
+
+__version__ = version("waterbodies")
