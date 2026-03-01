@@ -1,21 +1,24 @@
 name: Publish Docker Image
 
 on:
-  workflow_run:
-    workflows:
-      - "Create a new tag"
+  pull_request:
     types: 
-      - completed
+      - closed
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
   workflow_dispatch:
 
 
 env:
-  IMAGE_NAME: digitalearthafrica/waterbodies
+  IMAGE_NAME: ${{ vars.DOCKER_ORG_NAME || 'digitalearthafrica' }}/deafrica-scripts
 
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -35,10 +38,10 @@ jobs:
           password: ${{ secrets.DEAFRICA_DOCKER_PASSWORD}}
 
       - name: Get version number for tagging the image
+        id: version
         run: |
-          git fetch --all --tags
-          pip install setuptools-scm
-          echo "VERSION=$(python -m setuptools_scm  | sed s/+/./g)" >> $GITHUB_ENV
+          VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -46,4 +49,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}

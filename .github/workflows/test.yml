@@ -7,7 +7,8 @@ on:
       - '.github/**'
 
 env:
-    IMAGE_NAME: digitalearthafrica/waterbodies
+    IMAGE_NAME: ${{ vars.DOCKER_ORG_NAME || 'digitalearthafrica' }}/deafrica-scripts
+
 
 jobs:
   test:
