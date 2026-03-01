@@ -75,10 +75,7 @@ waterbodies = "waterbodies.cli.main:waterbodies"
 [tool.setuptools]
 package-dir = {"" = "src"}
 
-[tool.isort]
-profile = "black"
-
-[tool.black]
+[tool.ruff]
 line-length = 100
 
 [tool.pytest.ini_options]

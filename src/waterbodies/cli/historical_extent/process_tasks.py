@@ -81,7 +81,7 @@ def process_tasks(
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
-        _log.info(f"Processing task: {task}   {idx+1}/{len(tasks)}")
+        _log.info(f"Processing task: {task}   {idx + 1}/{len(tasks)}")
         tile_index_x = task["tile_index_x"]
         tile_index_y = task["tile_index_y"]
         task_datasets_ids = task["task_datasets_ids"]

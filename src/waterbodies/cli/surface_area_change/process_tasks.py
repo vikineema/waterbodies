@@ -86,7 +86,7 @@ def process_tasks(
 
     failed_tasks = []
     for idx, task in enumerate(tasks):
-        _log.info(f"Processing task: {task}   {idx+1}/{len(tasks)}")
+        _log.info(f"Processing task: {task}   {idx + 1}/{len(tasks)}")
 
         solar_day = task["solar_day"]
         tile_index_x = task["tile_index_x"]

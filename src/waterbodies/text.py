@@ -100,7 +100,7 @@ def get_task_id_tuple_from_str(task_id_str: str) -> tuple[str, int, int]:
 
 
 def format_task(
-    task: dict[tuple[str, int, int], list[str]] | dict[tuple[int, int], list[str]]
+    task: dict[tuple[str, int, int], list[str]] | dict[tuple[int, int], list[str]],
 ) -> dict:
     """
     Format task.

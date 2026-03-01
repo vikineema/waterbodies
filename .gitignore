@@ -8,7 +8,12 @@ build/**
 dist/**
 **.tif.aux.xml
 **coverage**
-# Pycharm file
+# Jupyter files
+**/.bash_history
+**/.ipython/**
+**/.jupyter/**  
+**/.local/**
+# Pycharm files
 **/.idea/
 # Do not commit credentials
 **/.env

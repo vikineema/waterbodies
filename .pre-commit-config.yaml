@@ -1,7 +1,10 @@
+# 🎨✨ Pre-commit configuration ✨🎨
+# 🚀 Making your code beautiful, one commit at a time! 🚀
+
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 default_language_version:
-    python: python3.10.12
+    python: python3.12
 
 default_stages: [pre-commit, pre-push]
 
@@ -9,24 +12,21 @@ default_stages: [pre-commit, pre-push]
 exclude: tests/data
 
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-    -   id: check-merge-conflict
-    -   id: check-yaml
-    -   id: check-toml
-    -   id: check-added-large-files
-    # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
--   repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.3.0
-    hooks:
-      - id: black-jupyter
--   repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
--   repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-    -   id: flake8
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.6.0
+      hooks:
+        -   id: check-merge-conflict
+        -   id: check-yaml
+        -   id: check-toml
+        -   id: check-added-large-files
+        # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+    - repo: https://github.com/charliermarsh/ruff-pre-commit
+      rev: v0.15.4
+      hooks:
+        - id: ruff
+          name: "Ruff lint + fix (src + tests)"
+          entry: ruff
+          language: python
+          types: [python]
+          files: ^(src|tests)/.*\.py$
+          args: ["check", "--select", "I", "--fix"]
