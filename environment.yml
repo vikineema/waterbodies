@@ -15,4 +15,5 @@ dependencies:
   # developer tools
   - curl
   - unzip
+  - jq
   

@@ -1,46 +1,48 @@
 services:
   postgres:
-    image: kartoza/postgis:16-3.4
+    image: kartoza/postgis:18-3.6
     ports:
-      - "5434:5432"
+      - ${POSTGRES_PORT}:5432
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=opendatacubepassword
-      - POSTGRES_USER=postgres
-    expose:
-      - 5432
-    restart: always
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - ALLOW_IP_RANGE=${ALLOW_IP_RANGE}
+      - POSTGRES_MULTIPLE_EXTENSIONS=${POSTGRES_MULTIPLE_EXTENSIONS}
+      - FORCE_SSL=TRUE
+    restart: on-failure
+    healthcheck:
+      test: "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER}"
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+
 
   waterbodies:
     build:
       context: .
-      args:
-        - ENVIRONMENT=dev
     environment:
-      - DB_HOSTNAME=postgres
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=opendatacubepassword
-      - DB_DATABASE=postgres
+      - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
       - AWS_DEFAULT_REGION=af-south-1
       - AWS_S3_ENDPOINT=s3.af-south-1.amazonaws.com
       - AWS_ACCESS_KEY_ID=fake_id
       - AWS_SECRET_ACCESS_KEY=fake_key
       - AWS_NO_SIGN_REQUEST=YES
     volumes:
-      - .:/code
+      - .:/home/jovyan/
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 180 ; done"]
 
   index:
-     image: opendatacube/datacube-index:0.3.6
-     environment:
-        - DB_HOSTNAME=postgres
-        - DB_USERNAME=postgres
-        - DB_PASSWORD=opendatacubepassword
-        - DB_DATABASE=postgres
-        - DB_PORT=5432
+    image: opendatacube/datacube-index:0.4.5.dev19182185529
+    environment:
+        - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
         - AWS_DEFAULT_REGION=af-south-1
-     depends_on:
-        - postgres
-     entrypoint: bash -c 'sleep infinity'
+        - AWS_S3_ENDPOINT=s3.af-south-1.amazonaws.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: bash -c 'sleep infinity'

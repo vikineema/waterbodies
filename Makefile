@@ -42,7 +42,7 @@ run-tests:
 	docker compose exec -T waterbodies bash -c "coverage html"
 
 down: ## Bring down the system
-	docker compose down
+	docker compose down --remove-orphans
 
 shell: ## Start an interactive shell
 	docker compose exec waterbodies bash
@@ -54,4 +54,5 @@ logs: ## Show the logs from the stack
 	docker compose logs --follow
 
 pip_compile:
-	pip-compile --extra=lint --extra=tests --extra=viz --output-file=requirements.txt pyproject.toml requirements.in --verbose --upgrade  
+	# If using a conda environment with pip, make sure to activate the environment before running this command.
+	pip-compile --extra=lint --extra=tests --extra=viz --output-file=requirements.txt pyproject.toml --verbose --upgrade  

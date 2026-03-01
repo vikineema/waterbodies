@@ -279,6 +279,8 @@ jmespath==1.1.0
     #   botocore
 joblib==1.5.3
     # via scikit-learn
+jq==1.11.0
+    # via waterbodies (pyproject.toml)
 jsonpointer==3.0.0
     # via jsonschema
 jsonschema[format-nongpl]==4.26.0
