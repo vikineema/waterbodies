@@ -37,7 +37,7 @@ install-waterbodies: ## 5. Install waterbodies
 sleep:
 	sleep 1m
 
-test-env: build up sleep init products index install-waterbodies
+test-env: build up sleep init products index
 
 run-tests:
 	docker compose exec -T waterbodies bash -c "coverage run -m pytest ."
