@@ -25,7 +25,7 @@ from sqlalchemy.schema import Table
 from waterbodies.db import create_table
 from waterbodies.db_models import WaterbodyHistoricalExtent
 from waterbodies.grid import WaterbodiesGrid
-from waterbodies.io import find_geotiff_files
+from waterbodies.io import check_file_exists, find_geotiff_files
 from waterbodies.text import get_tile_index_str_from_tuple
 from waterbodies.utils import rio_slurp_xarray
 
@@ -175,9 +175,17 @@ def load_waterbodies_from_db(engine: Engine) -> gpd.GeoDataFrame:
     table = create_waterbodies_historical_extent_table(engine=engine)
     table_name = table.name
 
-    sql_query = f"SELECT * FROM {table_name}"
+    is_sqlite = engine.dialect.name == "sqlite"
+    if is_sqlite:
+        file_db = check_file_exists(engine.url.database)
+    else:
+        file_db = False
 
-    waterbodies = gpd.read_postgis(sql_query, engine, geom_col="geometry")
+    if is_sqlite and file_db:
+        waterbodies = gpd.read_file(f"sqlite:///{engine.url.database}", layer=table_name)
+    else:
+        sql_query = f"SELECT * FROM {table_name}"
+        waterbodies = gpd.read_postgis(sql_query, engine, geom_col="geometry")
 
     return waterbodies
 
@@ -300,7 +308,7 @@ def remove_small_waterbodies(waterbodies_raster: np.ndarray, min_size: int) -> n
     """
     labelled_waterbodies_raster = label(label_image=waterbodies_raster, background=0)
     labelled_waterbodies_raster = remove_small_objects(
-        labelled_waterbodies_raster, min_size=min_size, connectivity=1
+        labelled_waterbodies_raster, max_size=min_size - 1, connectivity=1
     )
     return labelled_waterbodies_raster
 
@@ -359,7 +367,7 @@ def generate_watershed_segmentation_markers(
     eroded_marker_source = erosion(image=marker_source, footprint=disk(radius=erosion_radius))
     watershed_segmentation_markers = label(label_image=eroded_marker_source, background=0)
     watershed_segmentation_markers = remove_small_objects(
-        watershed_segmentation_markers, min_size=min_size, connectivity=1
+        watershed_segmentation_markers, max_size=min_size - 1, connectivity=1
     )
     return watershed_segmentation_markers
 

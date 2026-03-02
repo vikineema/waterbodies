@@ -15,6 +15,7 @@ RUN if [ "$BUILD_ENV" = "dev" ]; then \
   micromamba run --name base pip install --no-cache-dir jupyterlab; \
 fi
 
+# RUN micromamba run --name base  pip-compile --extra=lint --extra=tests --extra=viz --output-file=requirements.txt pyproject.toml
 RUN micromamba run --name base pip install --no-cache-dir -r requirements.txt
 RUN micromamba run --name base pip install --no-cache-dir /code
 
@@ -28,7 +29,7 @@ RUN micromamba clean --all --index-cache --packages --tarballs \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -follow -type f -name '*.js' ! -name '*.min.js' -delete \
     && micromamba run --name base pip cache purge \
     && micromamba env export --name base --explicit
-     
+
 RUN waterbodies --version
 
 FROM ubuntu:jammy

@@ -56,10 +56,7 @@ tests = [
     "odc-apps-dc-tools>1.9.7",
 ]
 lint = [
-    "black[jupyter]",
-    "flake8",
-    "mypy",
-    "isort>=5.0.0",
+    "ruff",
     "pre-commit",
 ]
 viz = ["lxml"]

@@ -48,9 +48,9 @@ services:
   index:
     image: opendatacube/datacube-index:0.4.5.dev19182185529
     environment:
-        - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
-        - AWS_DEFAULT_REGION=af-south-1
-        - AWS_S3_ENDPOINT=s3.af-south-1.amazonaws.com
+      - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
+      - AWS_DEFAULT_REGION=af-south-1
+      - AWS_S3_ENDPOINT=s3.af-south-1.amazonaws.com
     depends_on:
       postgres:
         condition: service_healthy

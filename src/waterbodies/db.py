@@ -12,6 +12,8 @@ from sqlalchemy.schema import Table
 from waterbodies.db_models import WaterbodyBase
 from waterbodies.io import check_file_exists
 
+TEST_FILE_DB = "/tmp/test_waterbodies.db"
+
 _log = logging.getLogger(__name__)
 
 
@@ -59,10 +61,21 @@ def setup_sandbox_env(dotenv_path: str = os.path.join(str(Path.home()), ".env"))
                 raise ValueError(f"Waterbodies database credentials not in {dotenv_path}")
 
 
-def get_test_waterbodies_engine() -> Engine:
+def get_test_mem_waterbodies_engine() -> Engine:
     """Get a SQLite in-memory database engine."""
 
     engine = create_engine("sqlite+pysqlite:///:memory:", echo=False, future=True)
+    listen(engine, "connect", load_spatialite)
+    # Create the required waterbodies tables in the engine
+    metadata_obj = WaterbodyBase.metadata
+    metadata_obj.create_all(bind=engine, checkfirst=True)
+    return engine
+
+
+def get_test_waterbodies_engine() -> Engine:
+    """Get a SQLite file-based database engine."""
+
+    engine = create_engine(f"sqlite+pysqlite:///{TEST_FILE_DB}", echo=False, future=True)
     listen(engine, "connect", load_spatialite)
     # Create the required waterbodies tables in the engine
     metadata_obj = WaterbodyBase.metadata
@@ -85,13 +98,16 @@ def get_main_waterbodies_engine() -> Engine:
     dialect = "postgresql"
     driver = "psycopg2"
 
-    username = os.environ.get("WATERBODIES_DB_USER")
-    password = os.environ.get("WATERBODIES_DB_PASS")
-    host = os.environ.get("WATERBODIES_DB_HOST", "localhost")
-    port = os.environ.get("WATERBODIES_DB_PORT", 5432)
-    database_name = os.environ.get("WATERBODIES_DB_NAME")
+    database_url = os.environ.get("WATERBODIES_DB_URL")
 
-    database_url = f"{dialect}+{driver}://{username}:{password}@{host}:{port}/{database_name}"
+    if database_url is None:
+        username = os.environ.get("WATERBODIES_DB_USER")
+        password = os.environ.get("WATERBODIES_DB_PASS")
+        host = os.environ.get("WATERBODIES_DB_HOST", "localhost")
+        port = os.environ.get("WATERBODIES_DB_PORT", 5432)
+        database_name = os.environ.get("WATERBODIES_DB_NAME")
+
+        database_url = f"{dialect}+{driver}://{username}:{password}@{host}:{port}/{database_name}"
     return create_engine(database_url, future=True)
 
 

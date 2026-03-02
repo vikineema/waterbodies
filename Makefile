@@ -1,4 +1,5 @@
-SHELL := /bin/bash
+#!make
+SHELL := /usr/bin/env bash
 
 .DEFAULT_GOAL := help
 
@@ -16,13 +17,16 @@ build: ## 0. Build the base image
 	docker compose build
 
 up: ## 1. Bring up your Docker environment.
-	docker compose up -d 
+	docker compose up -d  postgres
+	docker compose up -d  index
+	docker compose up -d  waterbodies
 
 init: ## 2. Prepare the database, initialise the database schema.
 	docker compose exec -T index datacube -v system init
 
 products: ## 3. Add the wofs_ls product definition for testing.
 	docker compose exec -T index datacube -v product add https://raw.githubusercontent.com/digitalearthafrica/config/master/products/wofs_ls.odc-product.yaml
+	docker compose exec -T index datacube -v product add https://raw.githubusercontent.com/digitalearthafrica/config/master/products/wofs_ls_summary_alltime.odc-product.yaml
 
 index: ## 4. Index the test data.
 	cat index_tiles.sh | docker compose exec -T index bash
@@ -45,7 +49,7 @@ down: ## Bring down the system
 	docker compose down --remove-orphans
 
 shell: ## Start an interactive shell
-	docker compose exec waterbodies bash
+	docker compose exec waterbodies /bin/bash
 
 clean: ## Delete everything
 	docker compose down --rmi all --volumes
@@ -56,3 +60,10 @@ logs: ## Show the logs from the stack
 pip_compile:
 	# If using a conda environment with pip, make sure to activate the environment before running this command.
 	pip-compile --extra=lint --extra=tests --extra=viz --output-file=requirements.txt pyproject.toml --verbose --upgrade  
+
+jupyter-lab: ## Start Jupyter Lab
+	docker compose exec waterbodies jupyter lab --ip=0.0.0.0 --port=8889 --no-browser
+
+lint-src:
+	ruff check --select I --fix src/ tests/ notebooks/        
+	ruff format --verbose src/ tests/ notebooks/
