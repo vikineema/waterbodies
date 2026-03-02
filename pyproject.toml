@@ -58,6 +58,7 @@ tests = [
 lint = [
     "ruff",
     "pre-commit",
+    "yamllint",
 ]
 viz = ["lxml"]
 dev = ["waterbodies[tests, lint, viz]"]
