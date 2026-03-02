@@ -190,7 +190,7 @@ def get_waterbody_observations(
     task_datasets = [dc.index.datasets.get(ds_id) for ds_id in task_datasets_ids]
 
     ds = dc.load(
-        datasets=task_datasets, like=historical_extent_raster.geobox, group_by="solar_day"
+        datasets=task_datasets, like=historical_extent_raster.odc.geobox, group_by="solar_day"
     ).squeeze()
 
     da = mask_wofl(ds)
@@ -211,8 +211,8 @@ def get_waterbody_observations(
         waterbody_observations = pd.concat(polygons_pixel_counts, ignore_index=True)
 
         px_area = abs(
-            historical_extent_raster.geobox.resolution[0]
-            * historical_extent_raster.geobox.resolution[1]
+            historical_extent_raster.odc.geobox.resolution.x
+            * historical_extent_raster.odc.geobox.resolution.y
         )
 
         waterbody_observations["area_invalid_m2"] = waterbody_observations["px_invalid"] * px_area
