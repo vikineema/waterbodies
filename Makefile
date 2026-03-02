@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup up down clean test
+.PHONY: help setup up down clean test run-tests
 
 PRODUCT_CATALOG = "https://raw.githubusercontent.com/digitalearthafrica/config/master/prod/products_prod.csv"
 
@@ -40,10 +40,7 @@ sleep:
 test-env: build up sleep init products index
 
 run-tests:
-	docker compose exec -T waterbodies bash -c "coverage run -m pytest ."
-	docker compose exec -T waterbodies bash -c "coverage report -m"
-	docker compose exec -T waterbodies bash -c "coverage xml"
-	docker compose exec -T waterbodies bash -c "coverage html"
+	docker compose exec -T waterbodies bash -c "export COVERAGE_FILE=/tmp/.coverage && coverage run -m pytest -p no:cacheprovider . && coverage report -m && coverage xml -o /tmp/coverage.xml"
 
 down: ## Bring down the system
 	docker compose down --remove-orphans
