@@ -4,7 +4,7 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_DB=${POSTGRES_DB},${WATERBODIES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
       - ALLOW_IP_RANGE=${ALLOW_IP_RANGE}
@@ -18,11 +18,20 @@ services:
       retries: 3
       start_period: 1m
 
-
   waterbodies:
     build:
       context: .
+      args:
+        BUILD_ENV: "dev"
+    ports:
+      - 8889:8889
     environment:
+      - WATERBODIES_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${WATERBODIES_DB}
+      - WATERBODIES_DB_USER=${POSTGRES_USER}
+      - WATERBODIES_DB_PASS=${POSTGRES_PASS}
+      - WATERBODIES_DB_NAME=${WATERBODIES_DB}
+      - WATERBODIES_DB_HOST=postgres
+      - WATERBODIES_DB_PORT=5432
       - ODC_DEFAULT_DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
       - AWS_DEFAULT_REGION=af-south-1
       - AWS_S3_ENDPOINT=s3.af-south-1.amazonaws.com

@@ -1,6 +1,7 @@
 FROM mambaorg/micromamba:2.0.8 AS micromamba
 
 ENV PYTHONDONTWRITEBYTECODE=true
+ARG BUILD_ENV=prod
 ARG MAMBA_DOCKERFILE_ACTIVATE=1 
 
 USER root
@@ -8,10 +9,14 @@ RUN mkdir -p /code
 ADD . /code
 WORKDIR /code
 
-RUN micromamba install --yes --name base  --file environment.yml --verbose \
-  && micromamba run --name base pip install --no-cache-dir -r requirements.txt
+RUN micromamba install --yes --name base  --file environment.yml --verbose 
 
-RUN pip install --no-cache-dir /code
+RUN if [ "$BUILD_ENV" = "dev" ]; then \
+  micromamba run --name base pip install --no-cache-dir jupyterlab; \
+fi
+
+RUN micromamba run --name base pip install --no-cache-dir -r requirements.txt
+RUN micromamba run --name base pip install --no-cache-dir /code
 
 # Clean up
 RUN micromamba clean --all --index-cache --packages --tarballs \
@@ -22,7 +27,6 @@ RUN micromamba clean --all --index-cache --packages --tarballs \
     && find /opt/conda/ -follow -type f -name '*.js.map' -delete \
     && find /opt/conda/lib/python*/site-packages/bokeh/server/static -follow -type f -name '*.js' ! -name '*.min.js' -delete \
     && micromamba run --name base pip cache purge \
-    && rm -rf /root/.cache \
     && micromamba env export --name base --explicit
      
 RUN waterbodies --version
